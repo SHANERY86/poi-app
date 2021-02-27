@@ -7,8 +7,8 @@ const Places = {
     add: {
         handler: function (request, h) {
             const data = request.payload;
-            this.places = data;
-            return h.view("main", { places: this.places, });
+            this.places.push(data);
+            return h.redirect("/");
           }
     },
 };

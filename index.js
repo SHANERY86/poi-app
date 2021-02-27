@@ -22,7 +22,7 @@ server.views({
 
 
 server.bind({
-  places: {},
+  places: [],
 });
 
   server.route(require("./routes"));

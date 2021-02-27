@@ -1,6 +1,6 @@
 "use strict";
 
-const Places = require("./controllers/places");
+const Places = require("./app/controllers/places");
 
 module.exports = [
     { method: 'GET', path: '/', config: Places.home },
