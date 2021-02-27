@@ -1,7 +1,7 @@
 const Hapi = require('@hapi/hapi');
 const Inert = require("@hapi/inert");
 const Vision = require("@hapi/vision");
-const Handlebars = require("handlebars");
+
 
 
 async function init (){
@@ -16,28 +16,19 @@ await server.start();
 server.views({
   engines: {
     hbs: require("handlebars"),
-  }
+  },
+  path: "./app/views"
 })
 
-  server.route([
-    {
-      method: 'GET',
-      path: '/',
-      handler: function (request, h) {
-          return h.view("main");
-      }
-    },
-    {
-      method: 'POST',
-      path: '/add',
-      handler: function (request, h) {
-        const data = request.payload;
-        return h.view("main", { places: data })
-      }
-    } 
-  ]);
+
+server.bind({
+  places: {},
+});
+
+  server.route(require("./routes"));
 
   console.log(`Server started at ${server.info.uri}`);
 }
 
 init();
+
