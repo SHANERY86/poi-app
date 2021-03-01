@@ -21,10 +21,6 @@ server.views({
 })
 
 
-server.bind({
-  places: [],
-});
-
   server.route(require("./routes"));
 
   console.log(`Server started at ${server.info.uri}`);

@@ -12,7 +12,6 @@
             integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
             crossorigin="anonymous"
         />
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <div class="uk-container uk-margin">
@@ -20,26 +19,22 @@
                 <h2>Places of Interest</h2>
             </div>
             <div class="uk-card-default uk-card-body">
-            <form class="uk-form-stacked" action="/add" method="POST">
-                    <label class="uk-form-label" for="form-stacked-text">Enter Location Name</label>
-                    <div class="uk-form-controls">
-                        <input class="uk-input" id="form-stacked-text" type="text" name="title" placeholder="Name">  
-                    </div>
+                <form action="/add" method="POST">
+                    <label class="uk-form-label">Enter Location Name</label>
+                        <input class="uk-input"  type="text" name="title" placeholder="Name">  
                     <div class="uk-margin-top">
-                    <label class="uk-form-label" for="form-stacked-text">Enter Location Description</label> 
-                    <div class="uk-form-controls">
-                        <input class="uk-input" id="form-stacked-text" type="text" name="description" placeholder="Description">
-                    </div>
+                    <label class="uk-form-label">Enter Location Description</label> 
+                        <textarea class="uk-textarea" rows="5" type="text" name="description" placeholder="Description"></textarea>
                     </div>
                     <button class="submit uk-button uk-button-primary uk-margin-medium-top">ADD TO LIST</button>
-            </form>
+                </form>
             </div>  
+            {{#each places}}
                 <div class="uk-card-default uk-margin uk-card-body">  
-                    {{#each places}}
-                    {{title}} 
-                    {{description}} 
-                    {{/each}}
-                </div>    
+                    <h3>{{title}}</h3>
+                    <p>{{description}} </p>
+                </div>  
+            {{/each}}   
         </div>
     </body>
 </html>
