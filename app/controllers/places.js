@@ -3,7 +3,7 @@ var places = [];
 const Places = {
     home: {
         handler: function (request, h) {
-            return h.view("main", { places: places, });
+            return h.view("start", { places: places, });
         }
     },
     add: {

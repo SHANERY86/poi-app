@@ -17,7 +17,9 @@ server.views({
   engines: {
     hbs: require("handlebars"),
   },
-  path: "./app/views"
+  path: "./app/views",
+  partialsPath: "./app/views/partials",
+  layout: true
 })
 
 
