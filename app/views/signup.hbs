@@ -1,12 +1,12 @@
-{{> topmenu}}
+{{> startmenu}}
 <div class="uk-margin"></div>
     <div class="uk-child-width-expand" uk-grid>
         <div class="uk-width-1-2">
             <div class="uk-card-default uk-card-body">
-                <form action="/register" method="POST">
+                <form action="/adduser" method="POST">
                     <h2>CREATE ACCOUNT</h2>
                     <label class="uk-form-label">Name</label>
-                    <input class="uk-input"  type="text" name="firstName" placeholder="Name">  
+                    <input class="uk-input"  type="text" name="name" placeholder="Name">  
                     <div class="uk-margin-top">
                         <label class="uk-form-label">E-mail Address</label> 
                         <input class="uk-input"  type="text" name="email" placeholder="email">  
