@@ -35,3 +35,4 @@ See layout.hbs for UIkit and Font Awesome initialisation
 
 ## Author
 Shane Ryan
+shanery86@gmail.com
