@@ -34,4 +34,5 @@ See layout.hbs for UIkit and Font Awesome initialisation
 * Update/Delete POI.
 
 ## Author
-Shane Ryan
+Shane Ryan <br />
+shanery86@gmail.com
