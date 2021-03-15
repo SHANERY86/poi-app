@@ -21,5 +21,6 @@ module.exports = [
             path: "./app/public",
           },
         },
-      },
+        options: { auth: false }
+      }
 ];

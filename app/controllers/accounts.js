@@ -1,29 +1,32 @@
 users = [];
-currentUser = {};
+
 
 const Accounts = {
     signup: {
+        auth: false,
         handler: function(request, h) {
             return h.view("signup");
         }
     },
     loginView: {
+        auth: false,
         handler: function(request, h) {
             return h.view("login");
         }
     },
     login: {
+        auth: false,
         handler: function(request, h) {
-            var auth = false;
+            var check = false;
             const userEntry = request.payload;
             userPassword = userEntry.password;          
             users.forEach(function(user) {
                 if ( userEntry.email == user.email && userPassword == user.password) {
-                    auth = true;
+                    check = true;
                 }
             });
-            if ( auth ) {
-                currentUser = userEntry;
+            if ( check ) {
+                request.cookieAuth.set({ id: userEntry.email });
                 return h.view("addplaces");
             }
             else {
@@ -33,19 +36,20 @@ const Accounts = {
         },
     logout: {
         handler: function(request, h) {
-            currentUser = {};
+            request.cookieAuth.clear();
             return h.redirect("/");
         }
     },
     adduser: {
+        auth: false,
         handler: function(request, h) {
             const newUser = request.payload;
-            currentUser = newUser;
             users.push({
                 Name: newUser.name,
                 email: newUser.email,
                 password: newUser.password
             });
+            request.cookieAuth.set({ id: newUser.email });
             return h.redirect("/addview");
         }
     }
