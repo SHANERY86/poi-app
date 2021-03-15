@@ -2,9 +2,14 @@ const Hapi = require('@hapi/hapi');
 const Inert = require("@hapi/inert");
 const Vision = require("@hapi/vision");
 const Cookie = require("@hapi/cookie");
-const env = require('dotenv');
+const Joi = require("@hapi/joi")
+const dotenv = require('dotenv');
 
-env.config();
+const result = dotenv.config();
+if (result.error) {
+  console.log(result.error.message);
+  process.exit(1);
+}
 
 async function init (){
 const server = Hapi.server({
@@ -15,7 +20,9 @@ const server = Hapi.server({
 await server.register(Inert);
 await server.register(Vision);
 await server.register(Cookie);
+server.validator(require("@hapi/joi"));
 await server.start();
+require('./app/models/db')
 
 server.views({
   engines: {

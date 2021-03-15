@@ -1,5 +1,6 @@
-users = [];
-
+const User = require('../models/user');
+const Boom = require('@hapi/boom');
+const Joi = require('@hapi/joi');
 
 const Accounts = {
     signup: {
@@ -16,24 +17,39 @@ const Accounts = {
     },
     login: {
         auth: false,
-        handler: function(request, h) {
-            var check = false;
-            const userEntry = request.payload;
-            userPassword = userEntry.password;          
-            users.forEach(function(user) {
-                if ( userEntry.email == user.email && userPassword == user.password) {
-                    check = true;
-                }
-            });
-            if ( check ) {
-                request.cookieAuth.set({ id: userEntry.email });
-                return h.view("addplaces");
+        validate: {
+            payload: {
+              email: Joi.string().email().required(),
+              password: Joi.string().required(),
+            },
+            options: {
+                abortEarly: false,
+              },
+            failAction: function (request, h, error) {
+              return h
+                .view("login", {
+                  errors: error.details
+                })
+                .takeover()
+                .code(400);
+            },
+          }, 
+        handler: async function(request, h) { 
+            const { email, password } = request.payload;         
+            let user = await User.findByEmail(email);
+            try {
+            if (!user) {
+                const message = "Email address is not registered";
+                throw Boom.unauthorized(message);
             }
-            else {
-                return h.redirect("/loginView");
-            } 
+            user.comparePassword(password);
+            request.cookieAuth.set({ id: user.id });
+            return h.view("addplaces");
+        } catch(err) {
+            return h.view("login", { errors: [{ message: err.message }] });
         }
-        },
+        }
+    },
     logout: {
         handler: function(request, h) {
             request.cookieAuth.clear();
@@ -42,15 +58,43 @@ const Accounts = {
     },
     adduser: {
         auth: false,
-        handler: function(request, h) {
-            const newUser = request.payload;
-            users.push({
-                Name: newUser.name,
-                email: newUser.email,
-                password: newUser.password
-            });
-            request.cookieAuth.set({ id: newUser.email });
-            return h.redirect("/addview");
+        validate: {
+            payload: {
+              name: Joi.string().required(),
+              email: Joi.string().email().required(),
+              password: Joi.string().required(),
+            },
+            options: {
+                abortEarly: false,
+              },
+            failAction: function (request, h, error) {
+              return h
+                .view("signup", {
+                  errors: error.details
+                })
+                .takeover()
+                .code(400);
+            },
+          }, 
+        handler: async function(request, h) {
+            const payload = request.payload;
+            let email = await User.findByEmail(payload.email);
+            try {
+                if(email){
+                    const message = "Email address is already on the system"
+                    throw Boom.badData(message);
+                }
+                const newUser = new User({
+                    name: payload.name,
+                    email: payload.email,
+                    password: payload.password
+                });
+                const user = await newUser.save();
+                request.cookieAuth.set({ id: user.id });
+                return h.redirect("/addview");
+            } catch(err) {
+                return h.view("signup", { errors: [{ message: err.message }] });
+            }
         }
     }
 }
