@@ -44,7 +44,7 @@ const Accounts = {
             }
             user.comparePassword(password);
             request.cookieAuth.set({ id: user.id });
-            return h.view("addplaces");
+            return h.redirect("/places");
         } catch(err) {
             return h.view("login", { errors: [{ message: err.message }] });
         }

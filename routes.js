@@ -13,6 +13,9 @@ module.exports = [
     { method: 'POST', path: '/login', config: Accounts.login },
     { method: 'GET', path: '/logout', config: Accounts.logout },    
     { method: 'POST', path: '/adduser', config: Accounts.adduser },
+    { method: 'GET', path: '/showplace/{_id}', config: Places.showPlace },
+    { method: 'POST', path: '/editplace/{_id}', config: Places.editPlace },
+    { method: 'GET', path: '/deleteplace/{_id}', config: Places.deletePlace },
     {
         method: "GET",
         path: "/{param*}",
