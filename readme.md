@@ -1,4 +1,4 @@
-# Places of Interest App v1.0
+# Places of Interest App v1.1
 
 ## Description
 This app allows a user to set up an account and store information about places in the world that they are interested in. This is an assigment required for the completion of the Enterprise Web Development module in the HDip in Computer Science 2020 course at Waterford Institute of Technology.
