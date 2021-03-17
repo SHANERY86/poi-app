@@ -30,6 +30,7 @@ npm install @hapi/cookie
 npm install handlebars
 npm install cloudinary
 npm install mongoose
+npm install dotenv
 ```
 See layout.hbs for UIkit and Font Awesome initialisation
 
