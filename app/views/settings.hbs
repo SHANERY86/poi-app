@@ -1,0 +1,30 @@
+{{> mainmenu subtitle="Edit your account details"}}
+<div class="uk-margin"></div>
+    <div class="uk-child-width-expand" uk-grid>
+        <div class="uk-width-1-2">
+            <div class="uk-card-default uk-card-body">
+                <form action="/edituser/{{user._id}}" method="POST">
+                    <h2>UPDATE ACCOUNT DETAILS</h2>
+                    <label class="uk-form-label">Name</label>
+                    <input class="uk-input"  type="text" name="name" value="{{user.name}}">
+                    <div class="uk-margin-top">
+                        <label class="uk-form-label">E-mail Address</label> 
+                        <input class="uk-input"  type="text" name="email" value="{{user.email}}">
+                    </div>
+                    <div class="uk-margin-top">
+                        <label class="uk-form-label">Password</label> 
+                        <input class="uk-input" type="password" name="password" value="{{user.password}}">  
+                    </div>                    
+                        <button class="uk-button uk-button-primary uk-margin-medium-top">UPDATE INFO</button>
+                </form>
+            </div>
+            <div class="uk-card">
+                <a href="/deleteacc/{{user._id}}"><button class="uk-button uk-button-danger uk-margin-medium-top">DELETE ACCOUNT</button></a>                    
+            </div>
+            {{> error }}
+        </div>
+        <div class="uk-width-1-2">
+            <img class="uk-padding uk-align-center" data-src="/images/globe_binoc.png" width="450" height="450" alt="" uk-img>
+        </div>
+    </div>
+</div>
