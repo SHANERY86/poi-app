@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const Boom = require('@hapi/boom');
 const Joi = require('@hapi/joi');
+const Place = require('../models/place');
 
 const Accounts = {
     signup: {
@@ -96,6 +97,69 @@ const Accounts = {
                 return h.view("signup", { errors: [{ message: err.message }] });
             }
         }
+    },
+    settings: {
+      handler: async function (request, h) {
+        const userid = request.auth.credentials.id;
+        const user = await User.findById(userid).lean();
+        return h.view("settings", { user: user });        
+      }
+    },
+    editUser: {
+      handler: async function(request, h) {
+        const userid = request.auth.credentials.id;
+        const user = await User.findById(userid);
+        const userUpdate = request.payload;
+        user.name = userUpdate.name;
+        user.email = userUpdate.email;
+        user.password = userUpdate.password;
+        await user.save();
+        const newUser = await User.findById(userid).lean();
+        return h.view("settings", { user: newUser });
+      }
+    },
+    adminLogin: {
+      auth: false,
+      handler: function(request, h) {
+        const password = "admin123";
+        return h.view("adminlogin", { password: password });
+      }
+    },
+    admin: {
+      auth: false,
+      handler: async function(request, h) {
+        const adminUser = await User.findByEmail('admin@admin.com');
+        const password = request.payload.password;
+        try{
+          adminUser.comparePassword(password);
+          request.cookieAuth.set({ id: adminUser.id });
+          const users = await User.findAll().lean();
+          const places = await Place.placeDb.findAll().lean();
+          users.forEach(function(user) {
+            var placeCount = 0;
+            userIdString = user._id.toString();         
+              places.forEach(function(place) {
+                placeIdString = place.user.toString();
+                if(placeIdString == userIdString) {
+                  placeCount += 1;
+          }
+        });
+          user.placeNumber = placeCount;
+      });
+        return h.view("admin", { users: users })
+      }
+      catch(err) {
+        return h.view("adminlogin", { errors: [{ message: err.message }] });
+        } 
+      } 
+    },
+    deleteUser: {
+      handler: async function(request, h) {
+        const userid = request.params._id;
+        const user = await User.findById(userid);
+        await user.remove();
+        return h.redirect("/");
+      }
     }
 }
 
