@@ -8,21 +8,11 @@ const userSchema = new Schema({
   password: String
 });
 
-const categorySchema = new Schema({
-  name: String,
-  user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-  }
-});
 
 userSchema.statics.findByEmail = function(email) {
     return this.findOne({ email: email });
 };
 
-categorySchema.statics.findAll = function() {
-  return this.find({});
-}
 
 userSchema.methods.comparePassword = function(candidatePassword) {
     const isMatch = this.password === candidatePassword;
