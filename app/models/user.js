@@ -8,6 +8,14 @@ const userSchema = new Schema({
   password: String
 });
 
+const categorySchema = new Schema({
+  name: String,
+  user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+  }
+});
+
 userSchema.statics.findByEmail = function(email) {
     return this.findOne({ email: email });
 };
