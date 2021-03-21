@@ -27,7 +27,7 @@ const Places = {
             else{
                 imageUrl = "https://res.cloudinary.com/djmtnizt7/image/upload/v1615932577/globe_binoc_ejxjwj.png"
             }
-            const newPlace = new Place.placeDb({
+            const newPlace = new Place({
                 name: data.name,
                 description: data.description,
                 user: user._id,
@@ -49,37 +49,25 @@ const Places = {
     places: {
         handler: async function (request, h) {
             const id = request.auth.credentials.id;
-            const user = await User.findById(id);
-            const places = await Place.placeDb.find({ user: user._id }).lean();                
+            const user = await User.findById(id);           
+            const places = await Place.find({ user: user._id }).lean();
             return h.view("places", { places: places, });           
-        }
-    },
-    placesByCategory: {
-        handler: async function (request, h) {
-            const categoryId = request.params._id; 
-            const category = await Place.categoryDb.find({ _id: categoryId });
-            const placesInCategory = await Place.placeDb.find({ category: category[0].name }).lean();
-            return h.view("places", { places: placesInCategory });          
         }
     },
     showPlace: {
         handler: async function (request, h) {
-            const userid = request.auth.credentials.id;
-            const user = await User.findById(userid);
-            const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
             const placeId = request.params._id;
-            const place = await Place.placeDb.findById(placeId).lean();
-            return h.view("editplace", { place: place, categories: userCategories })
+            const place = await Place.findById(placeId).lean();
+            return h.view("editplace", { place: place, })
         }
     },
     editPlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const newData = request.payload;
-            const place = await Place.placeDb.findById(placeId);
+            const place = await Place.findById(placeId);
             place.name = newData.name;
             place.description = newData.description;
-            place.category = newData.category;
             await place.save();
             return h.redirect("/places");
     }
@@ -87,30 +75,9 @@ const Places = {
     deletePlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
-            const place = await Place.placeDb.findById(placeId);
+            const place = await Place.findById(placeId);
             await place.remove();
             return h.redirect("/places");
-        }
-    },
-    category: {
-        handler: async function (request, h) {
-            const userid = request.auth.credentials.id;
-            const user = await User.findById(userid);
-            const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
-            return h.view("category", { categories: userCategories });
-        }
-    },
-    addCategory: {
-        handler: async function (request, h) {
-            const userid = request.auth.credentials.id;
-            const user = await User.findById(userid);
-            data = request.payload.category;
-            const newCategory = new Place.categoryDb({
-                name: data,
-                user: user
-            })
-            await newCategory.save();
-            return h.redirect("/category");
         }
     }
 };

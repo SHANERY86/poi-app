@@ -3,7 +3,6 @@ const Inert = require("@hapi/inert");
 const Vision = require("@hapi/vision");
 const Cookie = require("@hapi/cookie");
 const ImageStore = require('./app/utils/image-store');
-const User = require('./app/models/user');
 const dotenv = require('dotenv');
 
 const result = dotenv.config();
@@ -11,18 +10,6 @@ if (result.error) {
   console.log(result.error.message);
   process.exit(1);
 }
-
-async function setAdmin() {
-  users = await User.findAll();
-  if(users.length == 0){
-    adminUser = new User({
-      name: 'Admin',
-      email: 'admin@admin.com',
-      password: "admin123"
-    })
-    await adminUser.save();
-  }
-}; 
 
 async function init (){
 const server = Hapi.server({
@@ -68,11 +55,10 @@ server.auth.strategy('session', 'cookie', {
 
 server.auth.default('session');
 
-server.route(require("./routes"));
+  server.route(require("./routes"));
 
-console.log(`Server started at ${server.info.uri}`);
+  console.log(`Server started at ${server.info.uri}`);
 }
 
 init();
 
-setAdmin();

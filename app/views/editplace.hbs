@@ -8,17 +8,9 @@
             <label class="uk-form-label">Enter Location Description</label> 
             <textarea class="uk-textarea" rows="5" type="text" name="description">{{place.description}}</textarea>
         </div>
-<div class="uk-margin">
-                  <label class="uk-form-label">Enter Category</label>
-                    <select class="uk-select" type="text" name="category">
-                        {{#each categories}}
-                        <option>{{name}}</option>
-                        {{/each}}                                                    
-                    </select> 
-</div> 
         <div>   
-        <input type="submit" value="Update" class= "uk-button uk-button-primary uk-button-default">
-        </div>  
+        <input type="submit" value="Upload" class= "uk-button uk-button-primary uk-button-default">
+        </div> 
     </form>
 </div> 
 {{> error }} 
