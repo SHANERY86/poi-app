@@ -1,0 +1,16 @@
+{{> mainmenu subtitle="Select or create categories"}}
+<div class="uk-card uk-card-default uk-card-body uk-width-2-3 uk-align-center">
+    <form action="/createcat" method="POST">
+<div class="uk-flex">
+        <input class="uk-input" type="text" name="category" placeholder="Add new Category">
+        <button class="uk-button uk-button-primary uk-margin-left">Add</button>
+</div>
+    </form> 
+</div>
+<div class="uk-flex">
+    {{#each categories}}
+    <div class="uk-card uk-card-default uk-card-body uk-margin-left">
+        <a href="/placesbycat/{{_id}}">{{name}}</a>
+    </div>
+    {{/each}}
+</div>

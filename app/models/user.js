@@ -8,11 +8,13 @@ const userSchema = new Schema({
   password: String
 });
 
-
 userSchema.statics.findByEmail = function(email) {
     return this.findOne({ email: email });
 };
 
+userSchema.statics.findAll = function() {
+  return this.find( { email : { $nin: [ 'admin@admin.com' ] } } );
+}
 
 userSchema.methods.comparePassword = function(candidatePassword) {
     const isMatch = this.password === candidatePassword;
