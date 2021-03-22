@@ -118,7 +118,7 @@ const Accounts = {
         return h.view("settings", { user: newUser });
       }
     },
-    adminLogin: {
+    adminLoginView: {
       auth: false,
       handler: function(request, h) {
         const password = "admin123";

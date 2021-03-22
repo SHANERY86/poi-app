@@ -23,7 +23,7 @@ module.exports = [
     { method: 'GET', path: '/settings/{_id}', config: Accounts.settings },   
     { method: 'POST', path: '/edituser/{_id}', config: Accounts.editUser },
     { method: 'GET', path: '/deleteacc/{_id}', config: Accounts.deleteUser },    
-    { method: 'GET', path: '/adminlogin', config: Accounts.adminLogin },
+    { method: 'GET', path: '/adminlogin', config: Accounts.adminLoginView },
     { method: 'POST', path: '/admin', config: Accounts.admin },         
     {
         method: "GET",
