@@ -125,7 +125,7 @@ const Accounts = {
         return h.view("adminlogin", { password: password });
       }
     },
-    admin: {
+    adminLogin: {
       auth: false,
       handler: async function(request, h) {
         const adminUser = await User.findByEmail('admin@admin.com');
@@ -146,12 +146,18 @@ const Accounts = {
         });
           user.placeNumber = placeCount;
       });
-        return h.view("admin", { users: users })
+        return h.view("admindashboard", { users: users })
       }
       catch(err) {
         return h.view("adminlogin", { errors: [{ message: err.message }] });
         } 
-      } 
+      }
+    }, 
+    adminView: {
+      handler: async function(request, h) {
+      const users = await User.findAll().lean();
+      return h.view("admindashboard", { users: users })
+      }
     },
     deleteUser: {
       handler: async function(request, h) {
@@ -161,6 +167,6 @@ const Accounts = {
         return h.redirect("/");
       }
     }
-}
+  }
 
 module.exports = Accounts;
