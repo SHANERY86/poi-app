@@ -118,14 +118,14 @@ const Accounts = {
         return h.view("settings", { user: newUser });
       }
     },
-    adminLogin: {
+    adminLoginView: {
       auth: false,
       handler: function(request, h) {
         const password = "admin123";
         return h.view("adminlogin", { password: password });
       }
     },
-    admin: {
+    adminLogin: {
       auth: false,
       handler: async function(request, h) {
         const adminUser = await User.findByEmail('admin@admin.com');
@@ -144,14 +144,32 @@ const Accounts = {
                   placeCount += 1;
           }
         });
-          user.placeNumber = placeCount;
-      });
-        return h.view("admin", { users: users })
+        user.placeNumber = placeCount;
+        }); 
+        return h.view("admindashboard", { users: users })
       }
       catch(err) {
         return h.view("adminlogin", { errors: [{ message: err.message }] });
         } 
-      } 
+      }
+    }, 
+    adminView: {
+      handler: async function(request, h) {
+      const users = await User.findAll().lean();
+      const places = await Place.placeDb.findAll().lean();
+      users.forEach(function(user) {
+        var placeCount = 0;
+        userIdString = user._id.toString();         
+          places.forEach(function(place) {
+            placeIdString = place.user.toString();
+            if(placeIdString == userIdString) {
+              placeCount += 1;
+      }
+    });
+    user.placeNumber = placeCount;
+    }); 
+      return h.view("admindashboard", { users: users })
+      }
     },
     deleteUser: {
       handler: async function(request, h) {
@@ -160,7 +178,20 @@ const Accounts = {
         await user.remove();
         return h.redirect("/");
       }
-    }
-}
+    },
+/*    placeCount: async function(user) {
+          const places = await Place.placeDb.findAll().lean();
+         users.forEach(function(user) { 
+            var placeCount = 0; 
+            userIdString = user._id.toString();         
+              places.forEach(function(place) {
+                placeIdString = place.user.toString();
+                if(placeIdString == userIdString) {
+                  placeCount += 1;
+                }
+                return placeCount;
+  });
+} */
+  }
 
 module.exports = Accounts;

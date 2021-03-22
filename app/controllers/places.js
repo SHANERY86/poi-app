@@ -54,6 +54,14 @@ const Places = {
             return h.view("places", { places: places, });           
         }
     },
+    adminPlaces: {
+        handler: async function (request, h) {
+            const id = request.params._id;
+            const user = await User.findById(id).lean();
+            const places = await Place.placeDb.find({ user: user._id }).lean();                
+            return h.view("adminplaces", { places: places, user: user });            
+        }
+    }, 
     placesByCategory: {
         handler: async function (request, h) {
             const categoryId = request.params._id; 
@@ -72,6 +80,14 @@ const Places = {
             return h.view("editplace", { place: place, categories: userCategories })
         }
     },
+    adminShowPlace: {
+        handler: async function (request, h) {
+            const placeId = request.params._id;
+            const place = await Place.placeDb.findById(placeId).lean();
+            const user = await User.findById(place.user).lean();
+            return h.view("admineditplace", { place: place , user: user })
+        }
+    },    
     editPlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
@@ -82,14 +98,38 @@ const Places = {
             place.category = newData.category;
             await place.save();
             return h.redirect("/places");
-    }
-},
+        }
+    },
+    adminEditPlace: {
+        handler: async function (request, h) {
+            const placeId = request.params._id;
+            const newData = request.payload;
+            const place = await Place.placeDb.findById(placeId);
+            place.name = newData.name;
+            place.description = newData.description;
+            place.category = newData.category;
+            await place.save();
+            const user = await User.findById(place.user).lean();
+            const places = await Place.placeDb.find({ user: user._id }).lean(); 
+            return h.view("adminplaces", { places: places, user: user });        
+        }
+    },        
     deletePlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
             await place.remove();
             return h.redirect("/places");
+        }
+    },
+    adminDeletePlace: {
+        handler: async function (request, h) {
+            const placeId = request.params._id;
+            const place = await Place.placeDb.findById(placeId);
+            const user = await User.findById(place.user).lean();
+            await place.remove();
+            const places = await Place.placeDb.find({ user: user._id }).lean(); 
+            return h.view("adminplaces", { places: places, user: user });        
         }
     },
     category: {
