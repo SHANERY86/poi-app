@@ -1,6 +1,5 @@
 {{> adminmenu subtitle="Admin logged in viewing user"}}
-<div class="uk-margin uk-card uk-flex uk-flex-center">
-     
+<div class="uk-margin uk-card uk-flex uk-flex-center">     
     <a href="/places"><button class="uk-button uk-button-primary">VIEW ALL</button></a>
     <a href="/category"><button class="uk-button uk-button-primary uk-margin-left">VIEW BY CATEGORY</button></a>
 </div>
@@ -16,10 +15,10 @@
         </div>
         <div>
             <div class="uk-padding">
-                <a href="/showplace/{{_id}}" style="margin:0" class ="uk-align-center">
+                <a href="/adminshowplace/{{_id}}" style="margin:0" class ="uk-align-center">
                     <i class="fas fa-pen" style="color:red" title="Edit" pos="bottom" uk-tooltip></i>
                 </a>            
-                <a href="/deleteplace/{{_id}}" style="margin:0" class ="uk-align-center">
+                <a href="/admindeleteplace/{{_id}}" style="margin:0" class ="uk-align-center">
                     <i class="fas fa-trash-alt" style="color:blue" title="Delete" pos="bottom" uk-tooltip></i>
                 </a> 
             </div>
