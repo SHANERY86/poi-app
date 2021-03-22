@@ -54,6 +54,14 @@ const Places = {
             return h.view("places", { places: places, });           
         }
     },
+    adminPlaces: {
+        handler: async function (request, h) {
+            const id = request.params._id;
+            const user = await User.findById(id).lean();
+            const places = await Place.placeDb.find({ user: user._id }).lean();                
+            return h.view("adminplaces", { places: places, user: user });            
+        }
+    }, 
     placesByCategory: {
         handler: async function (request, h) {
             const categoryId = request.params._id; 

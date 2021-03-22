@@ -10,6 +10,7 @@ module.exports = [
     { method: 'GET', path: '/category', config: Places.category },
     { method: 'POST', path: '/createcat', config: Places.addCategory },        
     { method: 'GET', path: '/places/{_id}', config: Places.places },
+    { method: 'GET', path: '/adminplaces/{_id}', config: Places.adminPlaces },    
     { method: 'GET', path: '/placesbycat/{_id}', config: Places.placesByCategory },          
     { method: 'POST', path: '/addplace', config: Places.add },
     { method: 'GET', path: '/signup', config: Accounts.signup },
