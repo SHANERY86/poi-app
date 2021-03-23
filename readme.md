@@ -8,7 +8,7 @@ This app allows a user to set up an account and store information about places i
 ## Instructions
 
 ### Creating Places of Interest
-Create a Place of Interest(POI) entry by clicking the appropriate entry, filling in the fields and uploading a suitable photo. 
+Create a Place of Interest(POI) entry by clicking the add place icon, filling in the fields and uploading a suitable photo. 
 
 ### Viewing POIs by Category/Creating a category
 The POIs may be filtered by a certain category. This app allows the user to create their own list of categories, and list their POIs in each appropriate category. 
