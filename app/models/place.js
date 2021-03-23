@@ -8,6 +8,11 @@ const placeSchema = new Schema({
     category: String,
     lat: Number,
     long: Number,
+    temp: Number,
+    feelsLike: Number,
+    clouds: String,
+    windSpeed: String,
+    humidity: String,
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",

@@ -21,7 +21,16 @@ const Weather = {
       catch(err){
         console.log(err);
       }
-      console.log(weather);
+//      console.log(weather);
+
+      const report = {
+        temp : Math.round(weather.main.temp - 273.15),
+        feelsLike : Math.round(weather.main.feels_like -273.15),
+        clouds : weather.weather[0].description,
+        windSpeed: weather.wind.speed,
+        humidity : weather.main.humidity
+      }
+      return report;
     }
 }
 
