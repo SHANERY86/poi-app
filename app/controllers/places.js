@@ -1,6 +1,8 @@
 const Place = require("../models/place");
 const User = require("../models/user");
 const ImageStore = require("../utils/image-store");
+const Weather = require("../utils/weather");
+const Joi = require('@hapi/joi');
 
 const Places = {
     home: {
@@ -15,6 +17,27 @@ const Places = {
         }
     },
     add: {
+        validate: {
+            payload: {
+              name: Joi.string().required(),
+              description: Joi.string().required(),
+              imagefile: Joi.object().required().optional(),
+              latitude: Joi.number().allow(''),
+              longitude: Joi.number().allow('')
+            },
+            options: {
+                abortEarly: false,
+                allowUnknown: true
+              },
+            failAction: function (request, h, error) {
+              return h
+                .view("addplaces", {
+                  errors: error.details
+                })
+                .takeover()
+                .code(400);
+            },
+          }, 
         handler: async function (request, h) {
             try{
             const id = request.auth.credentials.id;
@@ -33,6 +56,17 @@ const Places = {
                 user: user._id,
                 image: imageUrl
             });
+            if(data.latitude && data.longitude){
+                weatherReport = await Weather.getWeather(data.latitude,data.longitude);
+                console.log(weatherReport);
+                newPlace.lat = data.latitude;
+                newPlace.long = data.longitude;
+                newPlace.temp = weatherReport.temp;
+                newPlace.feelsLike = weatherReport.feelsLike;
+                newPlace.clouds = weatherReport.clouds;
+                newPlace.windSpeed = weatherReport.windSpeed;
+                newPlace.humidity = weatherReport.humidity; 
+            }
             await newPlace.save();
             return h.redirect("/places");
         } catch(err) {
@@ -103,6 +137,15 @@ const Places = {
             place.category = newData.category;
             place.lat = newData.latitude;
             place.long = newData.longitude;
+            if(newData.latitude && newData.longitude){
+                weatherReport = await Weather.getWeather(newData.latitude,newData.longitude);
+                console.log(weatherReport);
+                place.temp = weatherReport.temp;
+                place.feelsLike = weatherReport.feelsLike;
+                place.clouds = weatherReport.clouds;
+                place.windSpeed = weatherReport.windSpeed;
+                place.humidity = weatherReport.humidity;
+            }
             const imageFile = request.payload.imagefile;
             if (Object.keys(imageFile).length > 0) {
                 if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
@@ -140,7 +183,9 @@ const Places = {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
             const imageId = await ImageStore.getImageId(place.image);
-            await ImageStore.deleteImage(imageId);
+            if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+                await ImageStore.deleteImage(imageId);
+        }
             await place.remove();
             return h.redirect("/places");
         }
