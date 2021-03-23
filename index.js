@@ -66,6 +66,7 @@ server.auth.strategy('session', 'cookie', {
   redirectTo: '/',
 });
 
+
 server.auth.default('session');
 
 server.route(require("./routes"));
