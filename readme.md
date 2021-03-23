@@ -16,6 +16,10 @@ To create a category, select the "View by Category" option in your Places List. 
 go back to your Place List and click the pen icon, this view allows you to edit this POI, and also set a category. Once you have set a POI to a category, you can view it in that
 category list.
 
+## Admin functionality
+The admin dashboard can be accessed by entering '/admin' at the end of the app url in the browser. The admin password is pre-programmed into the password field for demo purposes.
+Inside the admin dashboard, an admin user can delete users, and also view their place lists to delete or amend any information to control the content displayed on the app
+
 ## Associated frameworks and plugins
 Name|Function|
 |---|--------|

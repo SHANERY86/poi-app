@@ -25,7 +25,7 @@ const Places = {
             imageUrl = await ImageStore.uploadImage(imageFile);
             }
             else{
-                imageUrl = "https://res.cloudinary.com/djmtnizt7/image/upload/v1615932577/globe_binoc_ejxjwj.png"
+                imageUrl = "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"
             }
             const newPlace = new Place.placeDb({
                 name: data.name,
@@ -91,14 +91,35 @@ const Places = {
     editPlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
+//            console.log(placeId);
             const newData = request.payload;
+//            console.log(newData);
             const place = await Place.placeDb.findById(placeId);
+//            console.log(place.image);
+            const imageId = await ImageStore.getImageId(place.image);
             place.name = newData.name;
+//            console.log(place.name);
             place.description = newData.description;
             place.category = newData.category;
+            place.lat = newData.latitude;
+            place.long = newData.longitude;
+            const imageFile = request.payload.imagefile;
+            if (Object.keys(imageFile).length > 0) {
+                if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+                    await ImageStore.deleteImage(imageId);
+                }
+            newImageUrl = await ImageStore.uploadImage(imageFile);
+            place.image = newImageUrl;
+            }
             await place.save();
             return h.redirect("/places");
-        }
+        },
+        payload: {
+            multipart: true,
+            output: 'data',
+            maxBytes: 209715200,
+            parse: true
+          }
     },
     adminEditPlace: {
         handler: async function (request, h) {
@@ -118,6 +139,8 @@ const Places = {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
+            const imageId = await ImageStore.getImageId(place.image);
+            await ImageStore.deleteImage(imageId);
             await place.remove();
             return h.redirect("/places");
         }
@@ -126,10 +149,25 @@ const Places = {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
+            const imageId = await ImageStore.getImageId(place.url);
+            await ImageStore.deleteImage(imageId);
             const user = await User.findById(place.user).lean();
             await place.remove();
             const places = await Place.placeDb.find({ user: user._id }).lean(); 
             return h.view("adminplaces", { places: places, user: user });        
+        }
+    },
+    adminDeleteImage: {
+        handler: async function (request, h) {
+            const placeId = request.params._id;
+            const place = await Place.placeDb.findById(placeId);
+            const imageId = await ImageStore.getImageId(place.image);
+            await ImageStore.deleteImage(imageId);
+            place.image = "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"
+            await place.save();
+            const user = await User.findById(place.user).lean();
+            const places = await Place.placeDb.find({ user: user._id }).lean(); 
+            return h.view("adminplaces", { places: places, user: user });      
         }
     },
     category: {
