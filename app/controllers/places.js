@@ -12,8 +12,10 @@ const Places = {
         }
     },
     addView: {
-        handler: function (request, h) {
-            return h.view("addplaces");
+        handler: async function (request, h) {
+            const id = request.auth.credentials.id;
+            var userCategories = await Place.categoryDb.find({ user: id }).lean();
+            return h.view("addplaces", { categories: userCategories, } );
         }
     },
     add: {
@@ -58,7 +60,6 @@ const Places = {
             });
             if(data.latitude && data.longitude){
                 weatherReport = await Weather.getWeather(data.latitude,data.longitude);
-                console.log(weatherReport);
                 newPlace.lat = data.latitude;
                 newPlace.long = data.longitude;
                 newPlace.temp = weatherReport.temp;
@@ -84,7 +85,7 @@ const Places = {
         handler: async function (request, h) {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
-            const places = await Place.placeDb.find({ user: user._id }).lean();                
+            const places = await Place.placeDb.find({ user: user._id }).lean();            
             return h.view("places", { places: places, });           
         }
     },
@@ -139,7 +140,6 @@ const Places = {
             place.long = newData.longitude;
             if(newData.latitude && newData.longitude){
                 weatherReport = await Weather.getWeather(newData.latitude,newData.longitude);
-                console.log(weatherReport);
                 place.temp = weatherReport.temp;
                 place.feelsLike = weatherReport.feelsLike;
                 place.clouds = weatherReport.clouds;

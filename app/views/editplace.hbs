@@ -9,8 +9,9 @@
             <textarea class="uk-textarea" rows="5" type="text" name="description">{{place.description}}</textarea>
         </div>
         <div class="uk-margin">
-                  <label class="uk-form-label">Enter Category</label>
+                  <label class="uk-form-label">Enter Category (create categories from "view by category menu")</label>
                     <select class="uk-select" type="text" name="category">
+                        <option>None</option>
                         {{#each categories}}
                         <option>{{name}}</option>
                         {{/each}}                                                    
