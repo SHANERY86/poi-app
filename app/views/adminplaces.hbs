@@ -12,7 +12,19 @@
         <div class="uk-padding uk-width-expand">
             <h3 class="uk-card-title">{{name}}</h3>
             <p>{{description}} </p>
+                <div class="uk-text-muted">
+                        {{#if lat}}
+                        {{#if long}}
+                        GPS: ({{lat}}, {{long}}) <br>                 
+                        Temp: {{temp}} °C |
+                        Feels Like: {{feelsLike}} °C |
+                        {{clouds}} |
+                        Wind Speed: {{windSpeed}} m/s |
+                        Humidity: {{humidity}} % 
+                        {{/if}}
+                        {{/if}}
         </div>
+                </div>
         <div>
             <div class="uk-padding">
                 <a href="/adminshowplace/{{_id}}" style="margin:0" class ="uk-align-center">
