@@ -7,6 +7,14 @@
                 <label class="uk-form-label">Enter Location Description</label> 
                 <textarea class="uk-textarea" rows="5" type="text" name="description" placeholder="Description"></textarea>
             </div>
+                    <div class="uk-margin">
+                  <label class="uk-form-label">Enter Category</label>
+                    <select class="uk-select" type="text" name="category">
+                        {{#each categories}}
+                        <option>{{name}}</option>
+                        {{/each}}                                                    
+                    </select> 
+        </div>
              <div class="uk-margin uk-width-1-3@m">
                 <div class="uk-margin">
                 <label class="uk-form-label">Enter GPS Co-ordinates</label>  
