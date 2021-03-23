@@ -10,10 +10,10 @@
 <div class="uk-flex">
     {{#each categories}}
     <div class="uk-card uk-card-default uk-card-body uk-margin-left">
-        <a href="/placesbycat/{{_id}}">{{name}}</a>
-                 <a href="/deleteplace/{{_id}}" style="margin:0" class ="uk-align-center">
-                    <i class="fas fa-trash-alt" style="color:blue" title="Delete" pos="bottom" uk-tooltip></i>
-                </a>        
+        <a href="/placesbycat/{{_id}}">{{name}}</a>      
     </div>
+                     <a href="/deleteplace/{{_id}}" style="margin:0" class ="uk-align-center">
+                    <i class="fas fa-trash-alt" style="color:blue" title="Delete" pos="bottom" uk-tooltip></i>
+                </a>  
     {{/each}}
 </div>
