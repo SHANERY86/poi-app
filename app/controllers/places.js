@@ -93,12 +93,25 @@ const Places = {
             const placeId = request.params._id;
             const newData = request.payload;
             const place = await Place.placeDb.findById(placeId);
+            const imageId = await ImageStore.getImageId(place.image);
             place.name = newData.name;
             place.description = newData.description;
             place.category = newData.category;
+            const imageFile = request.payload.imagefile;
+            if (Object.keys(imageFile).length > 0) {
+            await ImageStore.deleteImage(imageId);
+            newImageUrl = await ImageStore.uploadImage(imageFile);
+            place.image = newImageUrl;
+            }
             await place.save();
             return h.redirect("/places");
-        }
+        },
+        payload: {
+            multipart: true,
+            output: 'data',
+            maxBytes: 209715200,
+            parse: true
+          }
     },
     adminEditPlace: {
         handler: async function (request, h) {
@@ -118,6 +131,8 @@ const Places = {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
+            const imageId = await ImageStore.getImageId(place.image);
+            await ImageStore.deleteImage(imageId);
             await place.remove();
             return h.redirect("/places");
         }
@@ -126,6 +141,8 @@ const Places = {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
+            const imageId = await ImageStore.getImageId(place.url);
+            await ImageStore.deleteImage(imageId);
             const user = await User.findById(place.user).lean();
             await place.remove();
             const places = await Place.placeDb.find({ user: user._id }).lean(); 

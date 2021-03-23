@@ -27,6 +27,24 @@ const ImageStore = {
         }
       },
 
+      getImageId: async function(url) {
+        try{
+          var id = "";
+          const response = await cloudinary.v2.api.resources();
+          const list = response.resources;
+          list.forEach(function(image){
+            const imageUrl = url;
+            if(image.url == imageUrl){
+              id = image.public_id
+            }
+          });
+          return id;
+        }
+        catch(err) {
+          console.log(err);
+      }       
+      },
+
       deleteImage: async function(id) {
         await cloudinary.v2.uploader.destroy(id, {});
       }
