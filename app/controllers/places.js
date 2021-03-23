@@ -91,10 +91,14 @@ const Places = {
     editPlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
+//            console.log(placeId);
             const newData = request.payload;
+//            console.log(newData);
             const place = await Place.placeDb.findById(placeId);
+//            console.log(place.image);
             const imageId = await ImageStore.getImageId(place.image);
             place.name = newData.name;
+//            console.log(place.name);
             place.description = newData.description;
             place.category = newData.category;
             const imageFile = request.payload.imagefile;
