@@ -1,4 +1,4 @@
-# Places of Interest App v1.2
+# Places of Interest App v1.3
 
 ## Description
 This app allows a user to set up an account and store information about places in the world that they are interested in. This is an assigment required for the completion of the Enterprise Web Development module in the HDip in Computer Science 2020 course at Waterford Institute of Technology.
@@ -14,11 +14,16 @@ Create a Place of Interest(POI) entry by clicking the add place icon, filling in
 The POIs may be filtered by a certain category. This app allows the user to create their own list of categories, and list their POIs in each appropriate category. 
 To create a category, select the "View by Category" option in your Places List. In this view, you will have the option to create a category. When you have created a category,
 go back to your Place List and click the pen icon, this view allows you to edit this POI, and also set a category. Once you have set a POI to a category, you can view it in that
-category list.
+category list. 
+
+### Weather Report
+When you have set accurate GPS co-ordinates for a POI, you will recieve a weather report at the bottom of the POI. GPS co-ordinates can be optionally input when creating a POI or added later in the edit POI menu.
 
 ## Admin functionality
 The admin dashboard can be accessed by entering '/admin' at the end of the app url in the browser. The admin password is pre-programmed into the password field for demo purposes.
 Inside the admin dashboard, an admin user can delete users, and also view their place lists to delete or amend any information to control the content displayed on the app
+
+
 
 ## Associated frameworks and plugins
 Name|Function|
@@ -79,11 +84,13 @@ secret=your-secret-key
 * User Account Admin
 * Place Categories
 
-## Roadmap
-
 ### v1.3
 * Admin dashboard and analytics
 * Location co-ordinates and weather
+
+## Roadmap
+* To be continued..
+
 
 ## Author
 Shane Ryan <br />
