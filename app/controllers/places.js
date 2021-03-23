@@ -101,6 +101,8 @@ const Places = {
 //            console.log(place.name);
             place.description = newData.description;
             place.category = newData.category;
+            place.lat = newData.latitude;
+            place.long = newData.longitude;
             const imageFile = request.payload.imagefile;
             if (Object.keys(imageFile).length > 0) {
                 if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){

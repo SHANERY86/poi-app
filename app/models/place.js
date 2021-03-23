@@ -6,6 +6,8 @@ const placeSchema = new Schema({
     description: String,
     image: String,
     category: String,
+    lat: Number,
+    long: Number,
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
