@@ -25,9 +25,9 @@ async function setAdmin() {
 }; 
 
 async function init (){
-const server = Hapi.server({
-    port: 3000,
-    host: "localhost",
+  
+  const server = Hapi.server({
+    port: process.env.PORT || 3000,
   });
 
   const credentials = {
