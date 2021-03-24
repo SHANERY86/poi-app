@@ -175,6 +175,11 @@ const Accounts = {
       handler: async function(request, h) {
         const userid = request.params._id;
         const user = await User.findById(userid);
+        const places = await Place.placeDb.find({ user: user._id });
+        places.forEach(async function(place) { 
+        const placeObj = Place.placeDb.find( { _id: place._id });
+        await placeObj.remove();
+        })
         await user.remove();
         return h.redirect("/");
       }
@@ -183,6 +188,11 @@ const Accounts = {
       handler: async function(request, h) {
         const userid = request.params._id;
         const user = await User.findById(userid);
+        const places = await Place.placeDb.find({ user: user._id });
+        places.forEach(async function(place) { 
+        const placeObj = Place.placeDb.find( { _id: place._id });
+        await placeObj.remove();
+        })
         await user.remove();
         return h.redirect("/adminview");
       }      
