@@ -72,9 +72,11 @@ const Places = {
             { console.log(err)
             }
             newPlace.category = category[0]._id;
-            }            
+            }     
+            console.log(data.latitude);       
             if(data.latitude && data.longitude){
                 weatherReport = await Weather.getWeather(data.latitude,data.longitude);
+                console.log(weatherReport);
                 newPlace.lat = data.latitude;
                 newPlace.long = data.longitude;
                 newPlace.temp = weatherReport.temp;
