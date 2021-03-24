@@ -179,6 +179,14 @@ const Accounts = {
         return h.redirect("/");
       }
     },
+    adminDeleteUser: {
+      handler: async function(request, h) {
+        const userid = request.params._id;
+        const user = await User.findById(userid);
+        await user.remove();
+        return h.redirect("/adminview");
+      }      
+    }
 /*    placeCount: async function(user) {
           const places = await Place.placeDb.findAll().lean();
          users.forEach(function(user) { 
