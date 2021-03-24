@@ -11,6 +11,7 @@ const Places = {
             return h.view("start");
         }
     },
+    //this will display the view with the form to add a new POI, it gathers the users categories to display them in the category select drop down menu
     addView: {
         handler: async function (request, h) {
             const id = request.auth.credentials.id;
@@ -18,6 +19,10 @@ const Places = {
             return h.view("addplaces", { categories: userCategories, } );
         }
     },
+    /*this adds a new POI, inputs are validated through Joi, an input for name and description is mandatory, others are optional. If no image is uploaded, a stand in
+    image is used. If values for longitude and latitude are entered, a weather report is generated and appended to the POI object. If a category is selected then this 
+    is appended to the object also.
+    */
     add: {
         validate: {
             payload: {
@@ -91,6 +96,7 @@ const Places = {
         parse: true
       }
     },
+    //displays the POI list without category filter
     places: {
         handler: async function (request, h) {
             const id = request.auth.credentials.id;
@@ -99,6 +105,7 @@ const Places = {
             return h.view("places", { places: places, });           
         }
     },
+    //displays the POI list for a user as a logged in admin
     adminPlaces: {
         handler: async function (request, h) {
             const id = request.params._id;
@@ -107,6 +114,7 @@ const Places = {
             return h.view("adminplaces", { places: places, user: user });            
         }
     }, 
+    //displays list of POIs with category filter
     placesByCategory: {
         handler: async function (request, h) {
             const categoryId = request.params._id; 
@@ -115,6 +123,7 @@ const Places = {
             return h.view("places", { places: placesInCategory });          
         }
     },
+    //shows the page to edit a POI
     showPlace: {
         handler: async function (request, h) {
             const userid = request.auth.credentials.id;
@@ -125,6 +134,7 @@ const Places = {
             return h.view("editplace", { place: place, categories: userCategories })
         }
     },
+    //shows the page to edit a POI as admin
     adminShowPlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
@@ -132,7 +142,8 @@ const Places = {
             const user = await User.findById(place.user).lean();
             return h.view("admineditplace", { place: place , user: user })
         }
-    },    
+    },  
+    //this will edit the POI, every entry for a POI can be changed here. New GPS co-ords with update the weather, hitting update without changing co-ords will update the weather  
     editPlace: {
         handler: async function (request, h) {
             const userid = request.auth.credentials.id;
@@ -143,6 +154,7 @@ const Places = {
             place.name = newData.name;
             place.description = newData.description;
             const categoryInput = newData.category;
+            if(categoryInput != "None"){
             try{
             var category = await Place.categoryDb.find({ name: categoryInput, user: userid });
             }
@@ -150,6 +162,10 @@ const Places = {
             { console.log(err)
             }
             place.category = category[0]._id;
+            }
+            if(categoryInput == "None"){
+                place.category = null;
+            }
             place.lat = newData.latitude;
             place.long = newData.longitude;
             if(newData.latitude && newData.longitude){
@@ -178,6 +194,7 @@ const Places = {
             parse: true
           }
     },
+    //admin edit POI page, only name description can be edited, and the photo can be deleted
     adminEditPlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
@@ -191,7 +208,8 @@ const Places = {
             const places = await Place.placeDb.find({ user: user._id }).lean(); 
             return h.view("adminplaces", { places: places, user: user });        
         }
-    },        
+    },
+    //deletes a POI and deletes the image on the cloudinary app        
     deletePlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
@@ -216,6 +234,7 @@ const Places = {
             return h.view("adminplaces", { places: places, user: user });        
         }
     },
+    //admin can delete inappropriate images
     adminDeleteImage: {
         handler: async function (request, h) {
             const placeId = request.params._id;

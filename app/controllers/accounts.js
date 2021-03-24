@@ -2,6 +2,7 @@ const User = require('../models/user');
 const Boom = require('@hapi/boom');
 const Joi = require('@hapi/joi');
 const Place = require('../models/place');
+const ImageStore = require("../utils/image-store");
 
 const Accounts = {
     signup: {
@@ -16,6 +17,7 @@ const Accounts = {
             return h.view("login");
         }
     },
+    // login requires an email input, and a string for password, both checked through Joi. Also sets a cookie. When logged in, displays the list of places (places.hbs)
     login: {
         auth: false,
         validate: {
@@ -57,6 +59,7 @@ const Accounts = {
             return h.redirect("/");
         }
     },
+  //adduser adds a new user through the signup view. checks for appropriate inputs with Joi, when new user is added, displays the view to add their first POI(addplaces.hbs)
     adduser: {
         auth: false,
         validate: {
@@ -98,6 +101,7 @@ const Accounts = {
             }
         }
     },
+    // will display the account settings page for this user
     settings: {
       handler: async function (request, h) {
         const userid = request.auth.credentials.id;
@@ -105,6 +109,7 @@ const Accounts = {
         return h.view("settings", { user: user });        
       }
     },
+    //takes updated settings for this user and saves over the old ones 
     editUser: {
       handler: async function(request, h) {
         const userid = request.auth.credentials.id;
@@ -118,6 +123,7 @@ const Accounts = {
         return h.view("settings", { user: newUser });
       }
     },
+    //this hardcodes the admin password (for demonstration purposes) for the admin login page
     adminLoginView: {
       auth: false,
       handler: function(request, h) {
@@ -125,6 +131,7 @@ const Accounts = {
         return h.view("adminlogin", { password: password });
       }
     },
+    //when the admin logs in, this will find all current users and the amount of places they have logged on their account and present it in the admindashboard.hbs view
     adminLogin: {
       auth: false,
       handler: async function(request, h) {
@@ -153,6 +160,7 @@ const Accounts = {
         } 
       }
     }, 
+    //this is same as above but when the admin clicks the link to return to dashboard
     adminView: {
       handler: async function(request, h) {
       const users = await User.findAll().lean();
@@ -171,14 +179,22 @@ const Accounts = {
       return h.view("admindashboard", { users: users })
       }
     },
+    /*when the user wants to delete their account, this will gather their places and categories and delete them, and then delete their account. Will also delete any associated images
+    uploaded to cloudinary */
     deleteUser: {
       handler: async function(request, h) {
         const userid = request.params._id;
         const user = await User.findById(userid);
+        console.log(user);
         const places = await Place.placeDb.find({ user: user._id });
         places.forEach(async function(place) { 
-          const placeObj = Place.placeDb.find( { _id: place._id });
-          await placeObj.remove();
+//          const placeObj = Place.placeDb.find( { _id: place._id });
+          const imageId = await ImageStore.getImageId(place.image);
+          if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+              await ImageStore.deleteImage(imageId);
+        }
+        console.log("removing place..");
+          await place.remove();
         })
         const categories = await Place.categoryDb.find( { user: user._id });
         categories.forEach(async function(category){
@@ -189,14 +205,18 @@ const Accounts = {
         return h.redirect("/");
       }
     },
+    // this will delete a user and their places and categories when in the admin view Will also delete any associated images uploaded to cloudinary
     adminDeleteUser: {
       handler: async function(request, h) {
         const userid = request.params._id;
         const user = await User.findById(userid);
         const places = await Place.placeDb.find({ user: user._id });
         places.forEach(async function(place) { 
-        const placeObj = Place.placeDb.find( { _id: place._id });
-        await placeObj.remove();
+        const imageId = await ImageStore.getImageId(place.image);
+        if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+          await ImageStore.deleteImage(imageId);
+        }
+        await place.remove();
         })
         const categories = await Place.categoryDb.find( { user: user._id });
         categories.forEach(async function(category){
@@ -207,19 +227,6 @@ const Accounts = {
         return h.redirect("/adminview");
       }      
     }
-/*    placeCount: async function(user) {
-          const places = await Place.placeDb.findAll().lean();
-         users.forEach(function(user) { 
-            var placeCount = 0; 
-            userIdString = user._id.toString();         
-              places.forEach(function(place) {
-                placeIdString = place.user.toString();
-                if(placeIdString == userIdString) {
-                  placeCount += 1;
-                }
-                return placeCount;
-  });
-} */
   }
 
 module.exports = Accounts;
