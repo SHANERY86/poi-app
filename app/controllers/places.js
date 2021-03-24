@@ -58,6 +58,16 @@ const Places = {
                 user: user._id,
                 image: imageUrl
             });
+            if(data.category != "None"){
+            const categoryInput = data.category;
+            try{
+            var category = await Place.categoryDb.find({ name: categoryInput, user: id });
+            }
+            catch(err)
+            { console.log(err)
+            }
+            newPlace.category = category[0]._id;
+            }            
             if(data.latitude && data.longitude){
                 weatherReport = await Weather.getWeather(data.latitude,data.longitude);
                 newPlace.lat = data.latitude;
@@ -101,7 +111,7 @@ const Places = {
         handler: async function (request, h) {
             const categoryId = request.params._id; 
             const category = await Place.categoryDb.find({ _id: categoryId });
-            const placesInCategory = await Place.placeDb.find({ category: category[0].name }).lean();
+            const placesInCategory = await Place.placeDb.find({ category: category[0]._id }).lean();
             return h.view("places", { places: placesInCategory });          
         }
     },
@@ -125,17 +135,21 @@ const Places = {
     },    
     editPlace: {
         handler: async function (request, h) {
+            const userid = request.auth.credentials.id;
             const placeId = request.params._id;
-//            console.log(placeId);
             const newData = request.payload;
-//            console.log(newData);
             const place = await Place.placeDb.findById(placeId);
-//            console.log(place.image);
             const imageId = await ImageStore.getImageId(place.image);
             place.name = newData.name;
-//            console.log(place.name);
             place.description = newData.description;
-            place.category = newData.category;
+            const categoryInput = newData.category;
+            try{
+            var category = await Place.categoryDb.find({ name: categoryInput, user: userid });
+            }
+            catch(err)
+            { console.log(err)
+            }
+            place.category = category[0]._id;
             place.lat = newData.latitude;
             place.long = newData.longitude;
             if(newData.latitude && newData.longitude){

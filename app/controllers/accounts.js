@@ -177,8 +177,13 @@ const Accounts = {
         const user = await User.findById(userid);
         const places = await Place.placeDb.find({ user: user._id });
         places.forEach(async function(place) { 
-        const placeObj = Place.placeDb.find( { _id: place._id });
-        await placeObj.remove();
+          const placeObj = Place.placeDb.find( { _id: place._id });
+          await placeObj.remove();
+        })
+        const categories = await Place.categoryDb.find( { user: user._id });
+        categories.forEach(async function(category){
+          const catObj = Place.categoryDb.find( { _id: category._id });
+          await catObj.remove();
         })
         await user.remove();
         return h.redirect("/");
@@ -192,6 +197,11 @@ const Accounts = {
         places.forEach(async function(place) { 
         const placeObj = Place.placeDb.find( { _id: place._id });
         await placeObj.remove();
+        })
+        const categories = await Place.categoryDb.find( { user: user._id });
+        categories.forEach(async function(category){
+          const catObj = Place.categoryDb.find( { _id: category._id });
+          await catObj.remove();
         })
         await user.remove();
         return h.redirect("/adminview");
