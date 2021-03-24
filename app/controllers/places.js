@@ -235,7 +235,15 @@ const Places = {
             await newCategory.save();
             return h.redirect("/category");
         }
-    }
+    },
+    deleteCategory: {
+        handler: async function (request, h) {
+            const categoryId = request.params._id;
+            category = await Place.categoryDb.findById(categoryId);
+            await category.remove();
+            return h.redirect("/category");
+        }
+    } 
 };
 
 module.exports = Places;
