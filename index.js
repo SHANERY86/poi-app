@@ -37,7 +37,6 @@ const server = Hapi.server({
   };
 
 
-
 await server.register(Inert);
 await server.register(Vision);
 await server.register(Cookie);
