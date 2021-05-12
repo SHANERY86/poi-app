@@ -70,6 +70,7 @@ server.auth.strategy('session', 'cookie', {
 server.auth.default('session');
 
 server.route(require("./routes"));
+server.route(require("./routes-api.js"));
 
 console.log(`Server started at ${server.info.uri}`);
 }
