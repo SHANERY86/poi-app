@@ -25,7 +25,35 @@ const Places = {
                 return Boom.notFound("No User with this id");
             }            
         }
-    }
+    },
+    create: {
+        auth: false,
+        handler: async function (request, h) {
+          const newPlace = new Place(request.payload);
+          const place = await newPlace.save();
+          if (place) {
+            return h.response(place).code(201);
+          }
+          return Boom.badImplementation("error creating place");
+        }
+      },
+      deleteAll: {
+        auth: false,
+        handler: async function (request, h) {
+          await Place.placeDb.remove({});
+          return { success: true };
+        }
+      },
+      deleteOne: {
+        auth: false,
+        handler: async function(request, h) {
+          const response = await Place.placeDb.deleteOne({ _id: request.params.id });
+          if (response.deletedCount == 1) {
+            return { success: true };
+          }
+          return Boom.notFound('id not found');
+        }
+      }
 };
 
 module.exports = Places;
