@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="92122c0b-e647-4390-a3d8-b2aabdad1ceb" name="Default Changelist" comment="" />
+    <list default="true" id="08187414-49bf-4870-a01d-51a2d7715b8c" name="Default Changelist" comment="idea" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,18 +39,6 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
-  </component>
-  <component name="RunManager" selected="Node.js.POI-nodemon (1)">
-    <configuration name="POI-nodemon (1)" type="NodeJSConfigurationType" node-parameters="C:\cs-wit\enterprise-web-dev\poi-app\node_modules\nodemon\bin\nodemon.js" path-to-js-file="index.js" working-dir="$PROJECT_DIR$">
-      <method v="2" />
-    </configuration>
-    <configuration name="POI-nodemon" type="NodeJSConfigurationType" node-parameters="C:\cs-wit\enterprise-web-dev\poi-app\node_modules\nodemon\bin\nodemon.js" path-to-js-file="index.js" working-dir="$PROJECT_DIR$">
-      <method v="2" />
-    </configuration>
-    <list>
-      <item itemvalue="Node.js.POI-nodemon" />
-      <item itemvalue="Node.js.POI-nodemon (1)" />
-    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -121,5 +109,9 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="idea" />
+    <option name="LAST_COMMIT_MESSAGE" value="idea" />
   </component>
 </project>
