@@ -13,7 +13,7 @@ if (result.error) {
 }
 
 async function setAdmin() {
-  users = await User.findAll();
+  users = await User.find();
   if(users.length == 0){
     adminUser = new User({
       name: 'Admin',

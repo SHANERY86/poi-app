@@ -2,6 +2,7 @@
 
 const Boom  = require('@hapi/boom');
 const Place = require('../models/place');
+const User = require('../models/user');
 
 const Places = {
     find: {
@@ -29,7 +30,16 @@ const Places = {
     create: {
         auth: false,
         handler: async function (request, h) {
-          const newPlace = new Place(request.payload);
+          const data = request.payload;
+          const user = await User.findOne({ _id: request.params.id });
+          if (!user) {
+            return Boom.notFound("No User with this id");
+          }
+          let newPlace = new Place.placeDb({
+            name: data.name,
+            description: data.description,
+            user: user._id
+           });
           const place = await newPlace.save();
           if (place) {
             return h.response(place).code(201);
@@ -41,6 +51,7 @@ const Places = {
         auth: false,
         handler: async function (request, h) {
           await Place.placeDb.remove({});
+          console.log("deleted");
           return { success: true };
         }
       },

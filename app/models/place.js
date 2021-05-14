@@ -12,12 +12,13 @@ const placeSchema = new Schema({
     feelsLike: Number,
     clouds: String,
     windSpeed: String,
-    humidity: String,
+    humidity: Number,
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
     }
-});
+},
+{ versionKey: false });
 
 const categorySchema = new Schema({
     name: String,

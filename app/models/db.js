@@ -6,6 +6,15 @@ if (result.error) {
   process.exit(1);
 }
 
+async function seed() {
+  var seeder = require('mais-mongoose-seeder')(Mongoose);
+  const data = require('./seed-data.json');
+  const Place = require('./place');
+  const User = require('./user');
+  const dbData = await seeder.seed(data, { dropDatabase: false, dropCollections: true });
+  console.log(dbData);
+}
+
 const Mongoose = require("mongoose");
 
 Mongoose.set("useNewUrlParser", true);
@@ -24,4 +33,5 @@ db.on("disconnected", function() {
 
 db.once("open", function() {
   console.log(`database connected to ${this.name} on ${this.host}`);
+  seed();
 });

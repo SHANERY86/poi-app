@@ -35,5 +35,9 @@
         "name": "Gary Smith",
         "email": "garysmith@gmail.com",
         "password": "secret"
+    },
+    "newPlace": {
+        "name": "Mt Everest",
+        "description": "Tallest Mountain in the World"
     }
 }
