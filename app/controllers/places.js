@@ -85,7 +85,20 @@ const Places = {
         handler: async function (request, h) {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
-            const places = await Place.placeDb.find({ user: user._id }).lean();            
+            const userPlaces = await Place.placeDb.find({ user: user._id }); 
+            userPlaces.forEach(async function(place) {
+                placeId = place._id;
+                placeData = await Place.placeDb.findById(placeId);
+                weatherReport = await Weather.getWeather(place.lat,place.long);
+                placeData.temp = weatherReport.temp;
+                placeData.feelsLike = weatherReport.feelsLike;
+                placeData.clouds = weatherReport.clouds;
+                placeData.windSpeed = weatherReport.windSpeed;
+                placeData.humidity = weatherReport.humidity; 
+                console.log(placeData);
+                await placeData.save();
+            })   
+            const places = await Place.placeDb.find({ user: user._id }).lean();       
             return h.view("places", { places: places, });           
         }
     },

@@ -1,0 +1,43 @@
+{
+    "appHost": "http://localhost:3000",
+    "users": [
+        {
+            "name": "Shane Ryan",
+            "email": "shanery86@gmail.com",
+            "password": "secret"
+        },
+        {
+            "name": "Jim Smith",
+            "email": "jimsmith@gmail.com",
+            "password": "secret"            
+        },
+        {
+            "name": "Jane Murphy",
+            "email": "janemurphy@gmail.com",
+            "password": "secret"            
+        }
+    ],
+    "places": [
+        {
+            "name": "New York",
+            "description": "A big city on the east coast of the USA"
+        },
+        {
+            "name": "London",
+            "description": "A big city in the heart of the UK"
+        },
+        {
+            "name": "Waterford",
+            "description": "A small city in the south east of Ireland"
+        }
+    ],
+    "newUser": {
+        "name": "Gary Smith",
+        "email": "garysmith@gmail.com",
+        "password": "secret"
+    },
+    "newPlace": {
+        "name": "Mt Everest",
+        "description": "Tallest Mountain in the World"
+    }
+}
