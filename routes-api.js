@@ -9,7 +9,9 @@ module.exports = [
     { method: 'DELETE', path: '/api/users/{id}', config: Users.deleteOne },
     { method: 'GET', path: '/api/places', config: Places.find },
     { method: 'GET', path: '/api/places/{id}', config: Places.findOne },
+    { method: 'GET', path: '/api/{id}/places', config: Places.findByUser },
     { method: 'POST', path: '/api/{id}/places', config: Places.create },
     { method: 'DELETE', path: '/api/places', config: Places.deleteAll },
-    { method: 'DELETE', path: '/api/places/{id}', config: Places.deleteOne }    
+    { method: 'DELETE', path: '/api/places/{id}', config: Places.deleteOne },
+    { method: 'DELETE', path: '/api/{id}/places', config: Places.deleteByUser}    
 ];

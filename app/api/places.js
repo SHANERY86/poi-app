@@ -27,6 +27,21 @@ const Places = {
             }            
         }
     },
+    findByUser: {
+      auth: false,
+      handler: async function (request, h) {
+        try {
+          const places = await Place.placeDb.find( { user: request.params.id });
+          if (!places){
+            return Boom.notFound("No places with this user ID");
+          }
+          return places;
+        }
+        catch (err) {
+          return Boom.notFound("No places with this User ID");
+        }
+      }
+    },
     create: {
         auth: false,
         handler: async function (request, h) {
@@ -51,7 +66,6 @@ const Places = {
         auth: false,
         handler: async function (request, h) {
           await Place.placeDb.remove({});
-          console.log("deleted");
           return { success: true };
         }
       },
@@ -63,6 +77,16 @@ const Places = {
             return { success: true };
           }
           return Boom.notFound('id not found');
+        }
+      },
+      deleteByUser: {
+        auth: false,
+        handler: async function(request, h) {
+          const response = await Place.placeDb.deleteMany( { user: request.params.id } )
+          if (response.deletedCount >= 1) {
+            return { success: true };
+          }
+          return Boom.notFound('This user has no places, or does not exist');
         }
       }
 };

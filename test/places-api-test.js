@@ -56,4 +56,31 @@ suite("Places API tests", function ()  {
         assert.equal(p2.length, 0);
     });
 
+    test("delete all places for user", async function () {
+        const u1 = await poiService.createUser(users[0]);
+        const u2 = await poiService.createUser(users[1]);
+        for (var i = 0; i < 2; i++) {
+            await poiService.createPlace(u1._id, places[i]);
+        }
+        await poiService.createPlace(u2._id, places[2]);
+        
+        let returnedPlaces = await poiService.getPlaces();
+        let u1Places = await poiService.getPlacesByUser(u1._id);
+        let u2Places = await poiService.getPlacesByUser(u2._id);
+
+        assert.equal(returnedPlaces.length, 3);
+        assert.equal(u1Places.length, 2);
+        assert.equal(u2Places.length, 1);
+
+        await poiService.deletePlacesByUser(u1._id);
+
+        returnedPlaces = await poiService.getPlaces();
+        u1Places = await poiService.getPlacesByUser(u1._id);
+        u2Places = await poiService.getPlacesByUser(u2._id);
+        
+        assert.equal(u1Places.length, 0);
+        assert.equal(u2Places.length, 1);
+        assert.equal(returnedPlaces.length, 1);
+    });
+
 });

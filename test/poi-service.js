@@ -46,6 +46,11 @@ class POIService {
         return response.data;
     }
 
+    async getPlacesByUser(id) {
+        const response = await axios.get(this.baseUrl + "/api/" + id + "/places");
+        return response.data;
+    }
+
     async createPlace(id, newPlace) {
         const response = await axios.post(this.baseUrl + "/api/" + id + "/places", newPlace);
         return response.data;
@@ -58,6 +63,11 @@ class POIService {
 
     async deleteAllPlaces() {
         const response = await axios.delete(this.baseUrl + "/api/places");
+        return response.data;
+    }
+
+    async deletePlacesByUser(id) {
+        const response = await axios.delete(this.baseUrl + "/api/" + id + "/places");
         return response.data;
     }
 }
