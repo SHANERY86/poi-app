@@ -3,6 +3,8 @@ const User = require("../models/user");
 const ImageStore = require("../utils/image-store");
 const Weather = require("../utils/weather");
 const Joi = require('@hapi/joi');
+const Boom = require('@hapi/boom');
+const sanitizeHtml = require('sanitize-html');
 
 const Places = {
     home: {
@@ -52,9 +54,15 @@ const Places = {
             else{
                 imageUrl = "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"
             }
+            const sanitisedName = sanitizeHtml(data.name);
+            const sanitisedDescription = sanitizeHtml(data.description);
+            if (sanitisedName == "" || sanitisedDescription == ""){
+                const message = "User Input blocked for security reasons"
+                throw Boom.badData(message);
+              }
             const newPlace = new Place.placeDb({
-                name: data.name,
-                description: data.description,
+                name: sanitisedName,
+                description: sanitisedDescription,
                 user: user._id,
                 image: imageUrl
             });
@@ -137,17 +145,46 @@ const Places = {
         }
     },    
     editPlace: {
+        validate: {
+            payload: {
+              name: Joi.string().required(),
+              description: Joi.string().required(),
+              imagefile: Joi.object().required().optional(),
+              latitude: Joi.number().allow(''),
+              longitude: Joi.number().allow('')
+            },
+            options: {
+                abortEarly: false,
+                allowUnknown: true
+              },
+            failAction: async function (request, h, error) {
+                const placeId = request.params._id;
+                const place = await Place.placeDb.findById(placeId);
+                const userid = request.auth.credentials.id;
+                const user = await User.findById(userid);
+                const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
+              return h
+                .view("editplace", { place: place, categories: userCategories,
+                  errors: error.details
+                })
+                .takeover()
+                .code(400);
+            },
+          }, 
         handler: async function (request, h) {
+            try {
             const placeId = request.params._id;
-//            console.log(placeId);
             const newData = request.payload;
-//            console.log(newData);
             const place = await Place.placeDb.findById(placeId);
-//            console.log(place.image);
             const imageId = await ImageStore.getImageId(place.image);
-            place.name = newData.name;
-//            console.log(place.name);
-            place.description = newData.description;
+            const sanitisedName = sanitizeHtml(newData.name);
+            const sanitisedDescription = sanitizeHtml(newData.description);
+            if (sanitisedName == "" || sanitisedDescription == ""){
+                const message = "User Input blocked for security reasons"
+                throw Boom.badData(message);
+              }
+            place.name = sanitisedName;
+            place.description = sanitisedDescription;
             place.category = newData.category;
             place.lat = newData.latitude;
             place.long = newData.longitude;
@@ -169,6 +206,15 @@ const Places = {
             }
             await place.save();
             return h.redirect("/places");
+        }
+        catch (err) {
+            const placeId = request.params._id;
+            const place = await Place.placeDb.findById(placeId).lean();
+            const userid = request.auth.credentials.id;
+            const user = await User.findById(userid);
+            const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
+            return h.view("editplace", { place: place, categories: userCategories, errors: [ { message: err.message } ] });
+        } 
         },
         payload: {
             multipart: true,
