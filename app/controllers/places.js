@@ -47,6 +47,7 @@ const Places = {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
             const data = request.payload;
+            const category = await Place.categoryDb.find({ name: data.category, user: user._id });
             const imageFile = request.payload.imagefile;
             if (Object.keys(imageFile).length > 0) {
             imageUrl = await ImageStore.uploadImage(imageFile);
@@ -66,6 +67,9 @@ const Places = {
                 user: user._id,
                 image: imageUrl
             });
+            if( data.category != "None"){
+                newPlace.category = category[0]._id;
+            }
             if(data.latitude && data.longitude){
                 weatherReport = await Weather.getWeather(data.latitude,data.longitude);
                 newPlace.lat = data.latitude;
@@ -95,16 +99,17 @@ const Places = {
             const user = await User.findById(id);
             const userPlaces = await Place.placeDb.find({ user: user._id }); 
             userPlaces.forEach(async function(place) {
-                placeId = place._id;
-                placeData = await Place.placeDb.findById(placeId);
-                weatherReport = await Weather.getWeather(place.lat,place.long);
+                if(place.lat && place.long){
+                let placeId = place._id;
+                let placeData = await Place.placeDb.findById(placeId);
+                let weatherReport = await Weather.getWeather(place.lat,place.long);
                 placeData.temp = weatherReport.temp;
                 placeData.feelsLike = weatherReport.feelsLike;
                 placeData.clouds = weatherReport.clouds;
                 placeData.windSpeed = weatherReport.windSpeed;
                 placeData.humidity = weatherReport.humidity; 
-                console.log(placeData);
                 await placeData.save();
+                }
             })   
             const places = await Place.placeDb.find({ user: user._id }).lean();       
             return h.view("places", { places: places, });           
@@ -121,8 +126,7 @@ const Places = {
     placesByCategory: {
         handler: async function (request, h) {
             const categoryId = request.params._id; 
-            const category = await Place.categoryDb.find({ _id: categoryId });
-            const placesInCategory = await Place.placeDb.find({ category: category[0].name }).lean();
+            const placesInCategory = await Place.placeDb.find({ category: categoryId }).lean();
             return h.view("places", { places: placesInCategory });          
         }
     },
@@ -173,6 +177,7 @@ const Places = {
           }, 
         handler: async function (request, h) {
             try {
+            const userid = request.auth.credentials.id;
             const placeId = request.params._id;
             const newData = request.payload;
             const place = await Place.placeDb.findById(placeId);
@@ -185,7 +190,10 @@ const Places = {
               }
             place.name = sanitisedName;
             place.description = sanitisedDescription;
-            place.category = newData.category;
+            const newCategory = await Place.categoryDb.find( { name: newData.category, user: userid });
+            if (newData.category != "None"){
+            place.category = newCategory[0]._id;
+            }
             place.lat = newData.latitude;
             place.long = newData.longitude;
             if(newData.latitude && newData.longitude){

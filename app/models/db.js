@@ -12,7 +12,7 @@ async function seed() {
   const Place = require('./place');
   const User = require('./user');
   const dbData = await seeder.seed(data, { dropDatabase: false, dropCollections: true });
-  console.log(dbData);
+//  console.log(dbData);
 }
 
 const Mongoose = require("mongoose");
