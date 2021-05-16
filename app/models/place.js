@@ -5,7 +5,10 @@ const placeSchema = new Schema({
     name: String,
     description: String,
     image: String,
-    category: String,
+    category: {
+        type: Schema.Types.ObjectId,
+        ref: "Category"
+    },
     lat: Number,
     long: Number,
     temp: Number,

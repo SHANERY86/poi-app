@@ -53,7 +53,7 @@
         "description": "A very interesting city in the USA",
         "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1618947790/xy0x6r5px25yi471hh01.jpg",
         "user": "->users.shane",
-        "category": "->categories.citiesShane.name",
+        "category": "->categories.citiesShane",
         "lat": 40.69, 
         "long": -74.04
     },
@@ -62,7 +62,7 @@
         "description": "The windy city",
         "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1619883447/lmnlfck10ekoicqffdml.jpg",
         "user": "->users.sarah",
-        "category": "->categories.CitiesSarah.name",
+        "category": "->categories.CitiesSarah",
         "lat": 41.88, 
         "long": -87.62
 
@@ -72,7 +72,7 @@
         "description": "A beautiful city in Denmark",
         "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1618866667/nywpv5vxwizwtio2563m.png",
         "user": "->users.cathy",
-        "category": "->categories.CitiesCathy.name",
+        "category": "->categories.CitiesCathy",
         "lat": 55.67, 
         "long": 12.56
     }
