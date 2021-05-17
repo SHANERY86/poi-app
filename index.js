@@ -12,17 +12,6 @@ if (result.error) {
   process.exit(1);
 } */
 
-async function setAdmin() {
-  users = await User.find();
-  if(users.length == 0){
-    adminUser = new User({
-      name: 'Admin',
-      email: 'admin@admin.com',
-      password: "admin123"
-    })
-    await adminUser.save();
-  }
-}; 
 
 async function init (){
 
@@ -76,4 +65,3 @@ console.log(`Server started at ${server.info.uri}`);
 
 init();
 
-setAdmin();
