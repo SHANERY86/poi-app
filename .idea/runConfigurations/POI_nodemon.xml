@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="POI-nodemon" type="NodeJSConfigurationType" node-parameters="C:\cs-wit\enterprise-web-dev\poi-app\node_modules\nodemon\bin\nodemon.js" path-to-js-file="index.js" working-dir="$PROJECT_DIR$">
-    <method v="2" />
-  </configuration>
-</component>
