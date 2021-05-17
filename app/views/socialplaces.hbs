@@ -1,9 +1,9 @@
-{{> mainmenu subtitle="Your personal list of places"}}
+{{> mainmenu subtitle="List of all users places"}}
 <div class="uk-margin uk-card uk-flex uk-flex-center">
-    <a href="/socialplaces"><button class="uk-button uk-button-primary">SOCIAL</button></a>
+    <a href="/places"><button class="uk-button uk-button-primary">PERSONAL</button></a>
     <a href="/places"><button class="uk-button uk-button-primary uk-margin-left">VIEW ALL</button></a>
     <a href="/category"><button class="uk-button uk-button-primary uk-margin-left">VIEW BY CATEGORY</button></a>
 </div>
 {{#each places}}
-{{> place personal='personal'}}        
-{{/each}}  
+{{> place }}
+{{/each}}

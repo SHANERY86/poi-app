@@ -19,7 +19,9 @@ const placeSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
-    }
+    },
+    username: String,
+    useremail: String
 },
 { versionKey: false });
 

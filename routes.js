@@ -7,6 +7,7 @@ module.exports = [
     { method: 'GET', path: '/', config: Places.home },
     { method: 'GET', path: '/addview', config: Places.addView },
     { method: 'GET', path: '/places', config: Places.places },
+    { method: 'GET', path: '/socialplaces', config: Places.socialPlaces },
     { method: 'GET', path: '/category', config: Places.category },
     { method: 'POST', path: '/createcat', config: Places.addCategory },  
     { method: 'GET', path: '/deletecat/{_id}', config: Places.deleteCategory },     
