@@ -4,7 +4,12 @@
             <img src="{{ image }}">
         </div>
         <div class="uk-padding uk-width-expand">
+            {{#if personal}}
             <h3 class="uk-card-title">{{name}}</h3>
+            {{/if}}
+            {{#unless personal}}
+             <h3 class="uk-card-title"><a href="place/{{_id}}">{{name}}</a></h3>
+            {{/unless}}           
             <p>{{description}} </p>
         <div class="uk-text-muted">
                         {{#if lat}}

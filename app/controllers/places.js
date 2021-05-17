@@ -144,6 +144,53 @@ const Places = {
             return h.view("socialplaces", { places: places, });                       
     }
 },
+    onePlace: {
+        handler: async function (request, h) {
+            const placeId = request.params.id;
+            const place = await Place.placeDb.findById(placeId).lean();
+            return h.view("place", { place: place });
+        }
+    },
+    rating: {
+        handler: async function (request, h) {
+            const userid = request.auth.credentials.id;
+            const user = await User.findById(userid);
+            const placeId = request.params.id;
+            const place = await Place.placeDb.findById(placeId).lean();
+            const existingRating = await Place.ratingDb.find({ user: user, place: place });
+            console.log(existingRating);
+            const ratingInput = request.payload.rating;
+            if(!existingRating[0]){
+            const rating = new Place.ratingDb({
+                user: user,
+                place: place,
+                rating: ratingInput
+             })
+             await rating.save();
+            }
+            if(existingRating[0]){
+                existingRating[0].rating = ratingInput;
+                await existingRating[0].save();
+            }
+             const placeRatings = await Place.ratingDb.find( { place: placeId } );
+             console.log(placeRatings);
+             let ratingstotal = 0;
+             let ratingsAvg = 0;
+             let index = 0;
+             placeRatings.forEach(function(placeRating) {
+                 ratingstotal += placeRating.rating;
+                 index++;
+             })
+             ratingsAvg = ratingstotal / index;
+             console.log(ratingsAvg);
+             const placeObj = await Place.placeDb.findById(placeId);
+             placeObj.numberOfRatings = index;
+             placeObj.rating = ratingsAvg;
+             await placeObj.save();
+             const updatedPlace = await Place.placeDb.findById(placeId).lean();            
+             return h.view("place", { place: updatedPlace });
+        }
+    },
     //displays the POI list for a user as a logged in admin
     adminPlaces: {
         handler: async function (request, h) {

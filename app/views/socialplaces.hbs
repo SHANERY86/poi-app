@@ -1,9 +1,7 @@
 {{> mainmenu subtitle="List of all users places"}}
 <div class="uk-margin uk-card uk-flex uk-flex-center">
     <a href="/places"><button class="uk-button uk-button-primary">PERSONAL</button></a>
-    <a href="/places"><button class="uk-button uk-button-primary uk-margin-left">VIEW ALL</button></a>
-    <a href="/category"><button class="uk-button uk-button-primary uk-margin-left">VIEW BY CATEGORY</button></a>
 </div>
 {{#each places}}
-{{> place }}
+{{> placecard }}
 {{/each}}
