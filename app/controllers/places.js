@@ -3,6 +3,8 @@ const User = require("../models/user");
 const ImageStore = require("../utils/image-store");
 const Weather = require("../utils/weather");
 const Joi = require('@hapi/joi');
+const Boom = require('@hapi/boom');
+const sanitizeHtml = require('sanitize-html');
 
 const Places = {
     home: {
@@ -50,6 +52,7 @@ const Places = {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
             const data = request.payload;
+            const category = await Place.categoryDb.find({ name: data.category, user: user._id });
             const imageFile = request.payload.imagefile;
             if (Object.keys(imageFile).length > 0) {
             imageUrl = await ImageStore.uploadImage(imageFile);
@@ -57,23 +60,21 @@ const Places = {
             else{
                 imageUrl = "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"
             }
+            const sanitisedName = sanitizeHtml(data.name);
+            const sanitisedDescription = sanitizeHtml(data.description);
+            if (sanitisedName == "" || sanitisedDescription == ""){
+                const message = "User Input blocked for security reasons"
+                throw Boom.badData(message);
+              }
             const newPlace = new Place.placeDb({
-                name: data.name,
-                description: data.description,
+                name: sanitisedName,
+                description: sanitisedDescription,
                 user: user._id,
                 image: imageUrl
             });
-            if(data.category != "None"){
-            const categoryInput = data.category;
-            try{
-            var category = await Place.categoryDb.find({ name: categoryInput, user: id });
+            if( data.category != "None"){
+                newPlace.category = category[0]._id;
             }
-            catch(err)
-            { console.log(err)
-            }
-            newPlace.category = category[0]._id;
-            }     
-            console.log(data.latitude);       
             if(data.latitude && data.longitude){
                 weatherReport = await Weather.getWeather(data.latitude,data.longitude);
                 console.log(weatherReport);
@@ -103,7 +104,21 @@ const Places = {
         handler: async function (request, h) {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
-            const places = await Place.placeDb.find({ user: user._id }).lean();            
+            const userPlaces = await Place.placeDb.find({ user: user._id }); 
+            userPlaces.forEach(async function(place) {
+                if(place.lat && place.long){
+                let placeId = place._id;
+                let placeData = await Place.placeDb.findById(placeId);
+                let weatherReport = await Weather.getWeather(place.lat,place.long);
+                placeData.temp = weatherReport.temp;
+                placeData.feelsLike = weatherReport.feelsLike;
+                placeData.clouds = weatherReport.clouds;
+                placeData.windSpeed = weatherReport.windSpeed;
+                placeData.humidity = weatherReport.humidity; 
+                await placeData.save();
+                }
+            })   
+            const places = await Place.placeDb.find({ user: user._id }).lean();       
             return h.view("places", { places: places, });           
         }
     },
@@ -120,8 +135,8 @@ const Places = {
     placesByCategory: {
         handler: async function (request, h) {
             const categoryId = request.params._id; 
-            const category = await Place.categoryDb.find({ _id: categoryId });
-            const placesInCategory = await Place.placeDb.find({ category: category[0]._id }).lean();
+
+            const placesInCategory = await Place.placeDb.find({ category: categoryId }).lean();
             return h.view("places", { places: placesInCategory });          
         }
     },
@@ -147,26 +162,52 @@ const Places = {
     },  
     //this will edit the POI, every entry for a POI can be changed here. New GPS co-ords with update the weather, hitting update without changing co-ords will update the weather  
     editPlace: {
+        validate: {
+            payload: {
+              name: Joi.string().required(),
+              description: Joi.string().required(),
+              imagefile: Joi.object().required().optional(),
+              latitude: Joi.number().allow(''),
+              longitude: Joi.number().allow('')
+            },
+            options: {
+                abortEarly: false,
+                allowUnknown: true
+              },
+            failAction: async function (request, h, error) {
+                const placeId = request.params._id;
+                const place = await Place.placeDb.findById(placeId);
+                const userid = request.auth.credentials.id;
+                const user = await User.findById(userid);
+                const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
+              return h
+                .view("editplace", { place: place, categories: userCategories,
+                  errors: error.details
+                })
+                .takeover()
+                .code(400);
+            },
+          }, 
         handler: async function (request, h) {
+            try {
             const userid = request.auth.credentials.id;
             const placeId = request.params._id;
             const newData = request.payload;
             const place = await Place.placeDb.findById(placeId);
             const imageId = await ImageStore.getImageId(place.image);
-            place.name = newData.name;
-            place.description = newData.description;
-            const categoryInput = newData.category;
-            if(categoryInput != "None"){
-            try{
-            var category = await Place.categoryDb.find({ name: categoryInput, user: userid });
-            }
-            catch(err)
-            { console.log(err)
-            }
-            place.category = category[0]._id;
-            }
-            if(categoryInput == "None"){
-                place.category = null;
+
+            const sanitisedName = sanitizeHtml(newData.name);
+            const sanitisedDescription = sanitizeHtml(newData.description);
+            if (sanitisedName == "" || sanitisedDescription == ""){
+                const message = "User Input blocked for security reasons"
+                throw Boom.badData(message);
+              }
+            place.name = sanitisedName;
+            place.description = sanitisedDescription;
+            const newCategory = await Place.categoryDb.find( { name: newData.category, user: userid });
+            if (newData.category != "None"){
+            place.category = newCategory[0]._id;
+
             }
             place.lat = newData.latitude;
             place.long = newData.longitude;
@@ -188,6 +229,15 @@ const Places = {
             }
             await place.save();
             return h.redirect("/places");
+        }
+        catch (err) {
+            const placeId = request.params._id;
+            const place = await Place.placeDb.findById(placeId).lean();
+            const userid = request.auth.credentials.id;
+            const user = await User.findById(userid);
+            const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
+            return h.view("editplace", { place: place, categories: userCategories, errors: [ { message: err.message } ] });
+        } 
         },
         payload: {
             multipart: true,

@@ -1,0 +1,81 @@
+{
+    "users": {
+        "_model": "User",
+        "shane": {
+            "name": "Shane Ryan",
+            "email": "shanery86@gmail.com",
+            "password": "secret"
+        },
+        "sarah":
+        {
+            "name": "Sarah Keane",
+            "email": "saharakeane@gmail.com",
+            "password": "secret"
+        },
+        "cathy":
+        {
+            "name": "Catherine Ryan",
+            "email": "cathy@gmail.com",
+            "password": "secret"
+        }
+    },
+        "categories": {
+        "_model": "Category",
+        "citiesShane": {
+            "name": "Cities",
+            "user": "->users.shane"
+        },
+        "CitiesSarah": {
+            "name": "Cities",
+            "user": "->users.sarah"
+        },
+        "CitiesCathy": {
+            "name": "Cities",
+            "user": "->users.cathy"
+        },
+        "TownsShane": {
+            "name": "Towns",
+            "user": "->users.shane"
+        },
+        "TownsSarah": {
+            "name": "Towns",
+            "user": "->users.sarah"
+        },
+        "TownsCathy": {
+            "name": "Towns",
+            "user": "->users.cathy"
+        }
+    },
+    "places": {
+        "_model": "Place",
+    "new york": {
+        "name": "New York",
+        "description": "A very interesting city in the USA",
+        "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1618947790/xy0x6r5px25yi471hh01.jpg",
+        "user": "->users.shane",
+        "category": "->categories.citiesShane",
+        "lat": 40.69, 
+        "long": -74.04
+    },
+    "chicago": {
+        "name": "Chicago",
+        "description": "The windy city",
+        "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1619883447/lmnlfck10ekoicqffdml.jpg",
+        "user": "->users.sarah",
+        "category": "->categories.CitiesSarah",
+        "lat": 41.88, 
+        "long": -87.62
+
+    },
+    "copenhagen": {
+        "name": "Copenhagen",
+        "description": "A beautiful city in Denmark",
+        "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1618866667/nywpv5vxwizwtio2563m.png",
+        "user": "->users.cathy",
+        "category": "->categories.CitiesCathy",
+        "lat": 55.67, 
+        "long": 12.56
+    }
+    }
+
+}

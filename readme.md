@@ -1,4 +1,4 @@
-# Places of Interest App v1.3
+# Places of Interest App v1.4
 
 ## Description
 This app allows a user to set up an account and store information about places in the world that they are interested in. This is an assigment required for the completion of the Enterprise Web Development module in the HDip in Computer Science 2020 course at Waterford Institute of Technology.
@@ -91,8 +91,14 @@ apiKey=your-api-key
 * Admin dashboard and analytics
 * Location co-ordinates and weather
 
+### v1.4
+* Exposed basic API endpoints
+* Created basic Unit Tests
+* Implemented sanitisation of inputs
+
 ## Roadmap
-* To be continued..
+* Social features (View other peoples POIs, commenting, rating)
+* Embedded map applet
 
 ## Author
 Shane Ryan <br />

@@ -13,7 +13,7 @@ if (result.error) {
 } */
 
 async function setAdmin() {
-  users = await User.findAll();
+  users = await User.find();
   if(users.length == 0){
     adminUser = new User({
       name: 'Admin',
@@ -35,6 +35,7 @@ async function init (){
     api_key: process.env.key,
     api_secret: process.env.secret
   };
+
 
 await server.register(Inert);
 await server.register(Vision);
@@ -68,6 +69,7 @@ server.auth.strategy('session', 'cookie', {
 server.auth.default('session');
 
 server.route(require("./routes"));
+server.route(require("./routes-api.js"));
 
 console.log(`Server started at ${server.info.uri}`);
 }

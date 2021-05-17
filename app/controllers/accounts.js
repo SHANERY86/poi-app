@@ -2,7 +2,9 @@ const User = require('../models/user');
 const Boom = require('@hapi/boom');
 const Joi = require('@hapi/joi');
 const Place = require('../models/place');
+const sanitizeHtml = require('sanitize-html');
 const ImageStore = require("../utils/image-store");
+
 
 const Accounts = {
     signup: {
@@ -88,10 +90,16 @@ const Accounts = {
                     const message = "Email address is already on the system"
                     throw Boom.badData(message);
                 }
+                const sanitisedName = sanitizeHtml(payload.name);
+                const sanitisedPassword = sanitizeHtml(payload.password);
+                if (sanitisedName == "" || sanitisedPassword == ""){
+                  const message = "User Input blocked for security reasons"
+                  throw Boom.badData(message);
+                }
                 const newUser = new User({
-                    name: payload.name,
+                    name: sanitisedName,
                     email: payload.email,
-                    password: payload.password
+                    password: sanitisedPassword
                 });
                 const user = await newUser.save();
                 request.cookieAuth.set({ id: user.id });
@@ -111,16 +119,48 @@ const Accounts = {
     },
     //takes updated settings for this user and saves over the old ones 
     editUser: {
+      validate: {
+        payload: {
+          name: Joi.string().required(),
+          email: Joi.string().email().required(),
+          password: Joi.string().required(),
+        },
+        options: {
+            abortEarly: false,
+          },
+        failAction: async function (request, h, error) {
+          const userid = request.auth.credentials.id;
+          const user = await User.findById(userid).lean();
+          return h
+            .view("settings", { user: user,
+              errors: error.details
+            })
+            .takeover()
+            .code(400);
+        },
+      }, 
       handler: async function(request, h) {
         const userid = request.auth.credentials.id;
-        const user = await User.findById(userid);
+        const user = await User.findById(userid)
         const userUpdate = request.payload;
-        user.name = userUpdate.name;
+        try {
+        const sanitisedName = sanitizeHtml(userUpdate.name);
+        const sanitisedPassword = sanitizeHtml(userUpdate.password);
+        if (sanitisedName == "" || sanitisedPassword == ""){
+          const message = "User Input blocked for security reasons"
+          throw Boom.badData(message);
+        }
+        user.name = sanitisedName;
         user.email = userUpdate.email;
-        user.password = userUpdate.password;
+        user.password = sanitisedPassword;
         await user.save();
         const newUser = await User.findById(userid).lean();
         return h.view("settings", { user: newUser });
+      }
+      catch (err) {
+        const user = await User.findById(userid).lean();
+        return h.view("settings", { user: user, errors: [ { message: err.message } ] } );
+      }
       }
     },
     //this hardcodes the admin password (for demonstration purposes) for the admin login page

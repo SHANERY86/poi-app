@@ -6,8 +6,8 @@ const placeSchema = new Schema({
     description: String,
     image: String,
     category: {
-            type:Schema.Types.ObjectId,
-            ref: "Category",
+        type: Schema.Types.ObjectId,
+        ref: "Category"
     },
     lat: Number,
     long: Number,
@@ -15,12 +15,13 @@ const placeSchema = new Schema({
     feelsLike: Number,
     clouds: String,
     windSpeed: String,
-    humidity: String,
+    humidity: Number,
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
     }
-});
+},
+{ versionKey: false });
 
 const categorySchema = new Schema({
     name: String,
