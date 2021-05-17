@@ -4,19 +4,19 @@ const Vision = require("@hapi/vision");
 const Cookie = require("@hapi/cookie");
 const ImageStore = require('./app/utils/image-store');
 const User = require('./app/models/user');
-const dotenv = require('dotenv');
+//const dotenv = require('dotenv');
 
-const result = dotenv.config();
+/*const result = dotenv.config();
 if (result.error) {
   console.log(result.error.message);
   process.exit(1);
-}
+} */
 
 
 async function init (){
-const server = Hapi.server({
-    port: 3000,
-    host: "localhost",
+
+  const server = Hapi.server({
+    port: process.env.PORT || 3000,
   });
 
   const credentials = {
