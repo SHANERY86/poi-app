@@ -17,6 +17,12 @@
             "name": "Catherine Ryan",
             "email": "cathy@gmail.com",
             "password": "secret"
+        },
+        "admin":
+        {
+            "name": "Admin",
+            "email": "admin@admin.com",
+            "password": "admin123"
         }
     },
         "categories": {
