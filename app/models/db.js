@@ -6,6 +6,8 @@ if (result.error) {
   process.exit(1);
 }
 
+//want this in develop branch only
+
 async function seed() {
   var seeder = require('mais-mongoose-seeder')(Mongoose);
   const data = require('./seed-data.json');
