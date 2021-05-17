@@ -1,10 +1,10 @@
-const dotenv = require('dotenv');
+/*const dotenv = require('dotenv');
 
 const result = dotenv.config();
 if (result.error) {
   console.log(result.error.message);
   process.exit(1);
-}
+} */
 
 //want this in develop branch only
 

@@ -1,4 +1,4 @@
-# Places of Interest App v1.3
+# Places of Interest App v1.4
 
 ## Description
 This app allows a user to set up an account and store information about places in the world that they are interested in. This is an assigment required for the completion of the Enterprise Web Development module in the HDip in Computer Science 2020 course at Waterford Institute of Technology.
@@ -13,8 +13,7 @@ Create a Place of Interest(POI) entry by clicking the add place icon, filling in
 ### Viewing POIs by Category/Creating a category
 The POIs may be filtered by a certain category. This app allows the user to create their own list of categories, and list their POIs in each appropriate category. 
 To create a category, select the "View by Category" option in your Places List. In this view, you will have the option to create a category. When you have created a category,
-go back to your Place List and click the pen icon, this view allows you to edit this POI, and also set a category. Once you have set a POI to a category, you can view it in that
-category list. 
+go back to your Place List and click the pen icon on a POI, this view allows you to edit this POI, and also set a new category. 
 
 ### Weather Report
 When you have set accurate GPS co-ordinates for a POI, you will recieve a weather report at the bottom of the POI. GPS co-ordinates can be optionally input when creating a POI or added later in the edit POI menu.
@@ -23,7 +22,8 @@ When you have set accurate GPS co-ordinates for a POI, you will recieve a weathe
 The admin dashboard can be accessed by entering '/admin' at the end of the app url in the browser. The admin password is pre-programmed into the password field for demo purposes.
 Inside the admin dashboard, an admin user can delete users, and also view their place lists to delete or amend any information to control the content displayed on the app
 
-
+## Placeholder Image
+This app uses a placeholder image "globe_binoc.img" found in app/public/images that is used when a user does not upload an image for a POI to keep the POI list neat. It is recommended you upload this placeholder, or your own, and change the placeholder URL where it seen in the code. Future releases will upload an image and provide a URL variable during initialisation. 
 
 ## Associated frameworks and plugins
 Name|Function|
@@ -71,6 +71,9 @@ db=mongodb+srv://paste-your-db-link-here
 name=cloudinary-account-name
 key=your-key
 secret=your-secret-key
+
+#Open weather
+apiKey=your-api-key
 ```
 
 ## Updates
@@ -88,8 +91,14 @@ secret=your-secret-key
 * Admin dashboard and analytics
 * Location co-ordinates and weather
 
+### v1.4
+* Exposed basic API endpoints
+* Created basic Unit Tests
+* Implemented sanitisation of inputs
+
 ## Roadmap
-* To be continued..
+* Social features (View other peoples POIs, commenting, rating)
+* Embedded map applet
 
 ## Author
 Shane Ryan <br />
