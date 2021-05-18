@@ -5,6 +5,7 @@ const Cookie = require("@hapi/cookie");
 const ImageStore = require('./app/utils/image-store');
 const User = require('./app/models/user');
 const dotenv = require('dotenv');
+const handlebars = require('handlebars');
 
 const result = dotenv.config();
 if (result.error) {
@@ -43,6 +44,16 @@ server.views({
   path: "./app/views",
   partialsPath: "./app/views/partials",
   layout: true
+});
+
+handlebars.registerHelper("ifReviewByYou", function(reviewUser,loggedInuser,options) {
+  if (reviewUser != undefined || loggedInuser != undefined) {
+  let a = reviewUser;
+  let b = loggedInuser;
+  if (a.toString() == b.toString()){ 
+  return options.fn(this); } 
+  return options.inverse(this);
+  }
 });
 
 server.auth.strategy('session', 'cookie', {

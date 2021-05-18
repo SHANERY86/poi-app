@@ -1,0 +1,17 @@
+{{> mainmenu subtitle="Write Review"}}
+<div class="uk-card uk-card-default uk-card-body">
+    <h3>Write Review</h3>
+    {{#unless review}}
+    <form action="/review/{{place._id}}" method="POST">   
+    <textarea class="uk-textarea" rows="5" type="text" name="review" placeholder="Write Review.."></textarea>
+    <button class="uk-button uk-button-primary uk-margin">SUBMIT</button>
+    </form>
+    {{/unless}}
+    {{#if review}}
+     <form action="/editreview/{{review._id}}" method="POST">   
+    <textarea class="uk-textarea" rows="5" type="text" name="review" placeholder="Write Review..">{{review.review}}</textarea>
+    <button class="uk-button uk-button-primary uk-margin">SUBMIT</button>
+    </form> 
+    {{/if}}  
+</div>
+

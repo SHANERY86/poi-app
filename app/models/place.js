@@ -27,6 +27,10 @@ const placeSchema = new Schema({
     numberOfRatings: {
         type: Number,
         default: 0
+    },
+    reviews: {
+        type: Schema.Types.Array,
+        ref: "Review"
     }
 },
 { versionKey: false });
@@ -48,7 +52,21 @@ const ratingSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Place"
     },
-    rating: Number
+    rating: Number,
+})
+
+const reviewSchema = new Schema({
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
+    username: String,
+    place: {
+        type: Schema.Types.ObjectId,
+        ref: "Place"
+    },
+    review: String,
+    dateAndTime: String
 })
 
 placeSchema.statics.findAll = function() {
@@ -67,9 +85,11 @@ categorySchema.statics.findAll = function() {
 const placeDb = Mongoose.model("Place", placeSchema);
 const categoryDb = Mongoose.model("Category", categorySchema); 
 const ratingDb = Mongoose.model("Rating", ratingSchema);
+const reviewDb = Mongoose.model("Review", reviewSchema)
 
 module.exports = { 
             placeDb,
             categoryDb,
-            ratingDb
+            ratingDb,
+            reviewDb
 };

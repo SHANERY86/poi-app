@@ -6,6 +6,7 @@ const Joi = require('@hapi/joi');
 const Boom = require('@hapi/boom');
 const sanitizeHtml = require('sanitize-html');
 
+
 const Places = {
     home: {
         auth: false,
@@ -148,7 +149,9 @@ const Places = {
         handler: async function (request, h) {
             const placeId = request.params.id;
             const place = await Place.placeDb.findById(placeId).lean();
-            return h.view("place", { place: place });
+            const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();
+            const user = await User.findById(request.auth.credentials.id).lean();
+            return h.view("place", { place: place, reviews: placeReviews, user: user });
         }
     },
     rating: {
@@ -158,7 +161,6 @@ const Places = {
             const placeId = request.params.id;
             const place = await Place.placeDb.findById(placeId).lean();
             const existingRating = await Place.ratingDb.find({ user: user, place: place });
-            console.log(existingRating);
             const ratingInput = request.payload.rating;
             if(!existingRating[0]){
             const rating = new Place.ratingDb({
@@ -173,7 +175,6 @@ const Places = {
                 await existingRating[0].save();
             }
              const placeRatings = await Place.ratingDb.find( { place: placeId } );
-             console.log(placeRatings);
              let ratingstotal = 0;
              let ratingsAvg = 0;
              let index = 0;
@@ -182,13 +183,74 @@ const Places = {
                  index++;
              })
              ratingsAvg = ratingstotal / index;
-             console.log(ratingsAvg);
              const placeObj = await Place.placeDb.findById(placeId);
              placeObj.numberOfRatings = index;
-             placeObj.rating = ratingsAvg;
+             placeObj.rating = Math.round(ratingsAvg * 10)/10;
              await placeObj.save();
-             const updatedPlace = await Place.placeDb.findById(placeId).lean();            
-             return h.view("place", { place: updatedPlace });
+             const updatedPlace = await Place.placeDb.findById(placeId).lean();   
+             const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();        
+             return h.view("place", { place: updatedPlace, reviews: placeReviews });
+        }
+    },
+    writeReview: {
+        handler: async function(request, h) {
+            const placeId = request.params.id;
+            const placeObj = await Place.placeDb.findById(placeId).lean();
+            return h.view("review", { place: placeObj });
+        }
+    },
+    review: {
+        handler: async function(request, h) {
+            const placeId = request.params.id;
+            const place = await Place.placeDb.findById(placeId);
+            const userid = request.auth.credentials.id;
+            const user = await User.findById(userid);
+            const dateAndTime = new DateAndTime();
+            const currentDateAndTime = dateAndTime.getDateAndTime();
+            const inputReview = request.payload.review; 
+            const review = new Place.reviewDb({
+                userId: userid,
+                username: user.name,
+                place: place,
+                review: inputReview,
+                dateAndTime: currentDateAndTime
+            })
+            await review.save();
+            const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();
+            const updatedPlace = await Place.placeDb.findById(placeId).lean();
+            const loggedInUser = await User.findById(userid).lean(); 
+            return h.view("place", { place: updatedPlace, reviews: placeReviews, user: loggedInUser } );
+        }
+    },
+    editReviewDisplay: {
+        handler: async function(request, h) {
+            const reviewId = request.params.id;
+            const review = await Place.reviewDb.findById( { _id: reviewId }).lean();
+            return h.view("review", { review: review });
+        }
+    },
+    editReview: {
+        handler: async function(request, h) {
+            const userid = request.auth.credentials.id;
+            const reviewId = request.params.id;
+            const review = await Place.reviewDb.findById( { _id: reviewId });
+            review.review = request.payload.review;
+            await review.save();
+            const placeReviews = await Place.reviewDb.find({ place: review.place }).lean();
+            const updatedPlace = await Place.placeDb.findById(review.place).lean();
+            const loggedInUser = await User.findById(userid).lean(); 
+            return h.view("place", { place: updatedPlace, reviews: placeReviews, user: loggedInUser } );
+        }
+    },
+    deleteReview: {
+        handler: async function(request, h) {
+            const userid = request.auth.credentials.id;            
+            const review = await Place.reviewDb.findById( { _id: request.params.id } );
+            review.remove();
+            const placeReviews = await Place.reviewDb.find({ place: review.place }).lean();
+            const updatedPlace = await Place.placeDb.findById(review.place).lean();
+            const loggedInUser = await User.findById(userid).lean(); 
+            return h.view("place", { place: updatedPlace, reviews: placeReviews, user: loggedInUser } );            
         }
     },
     //displays the POI list for a user as a logged in admin
@@ -399,5 +461,34 @@ const Places = {
         }
     } 
 };
+
+class DateAndTime{
+    getDateAndTime() {
+        const d = new Date();
+        let date = d.getDate().toString();
+        let month = (d.getMonth()+1).toString();
+        let hours = d.getHours().toString();
+        let mins = d.getMinutes().toString();
+        let secs = d.getSeconds().toString();
+        if(date.length == 1){
+            date = "0" + date; 
+        }
+        if(month.length == 1){
+            month = "0" + month; 
+        }
+        if(hours.length == 1){
+            hours = "0" + hours; 
+        }
+        if(mins.length == 1){
+            mins = "0" + mins; 
+        }
+        if(secs.length == 1){
+            secs = "0" + secs; 
+        }
+        const currentDateAndTime = date + "/" + month + "/" + d.getFullYear()
+                                    + " " + hours + ":" + mins + ":" + secs;
+        return currentDateAndTime;
+    }
+}
 
 module.exports = Places;
