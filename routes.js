@@ -2,6 +2,7 @@
 
 const Places = require("./app/controllers/places");
 const Accounts = require("./app/controllers/accounts");
+const Social = require("./app/controllers/social")
 
 module.exports = [
     { method: 'GET', path: '/', config: Places.home },
@@ -9,12 +10,21 @@ module.exports = [
     { method: 'GET', path: '/places', config: Places.places },
     { method: 'GET', path: '/socialplaces', config: Places.socialPlaces },
     { method: 'GET', path: '/place/{id}', config: Places.onePlace },  
-    { method: 'POST', path: '/rating/{id}', config: Places.rating },  
-    { method: 'GET', path: '/writereview/{id}', config: Places.writeReview },  
-    { method: 'GET', path: '/showreview/{id}', config: Places.editReviewDisplay },          
-    { method: 'POST', path: '/review/{id}', config: Places.review },    
-    { method: 'POST', path: '/editreview/{id}', config: Places.editReview },  
-    { method: 'GET', path: '/deletereview/{id}', config: Places.deleteReview },                 
+    { method: 'POST', path: '/rating/{id}', config: Social.rating },  
+    { method: 'GET', path: '/writereview/{id}', config: Social.writeReview },  
+    { method: 'GET', path: '/showreview/{id}', config: Social.editReviewDisplay },          
+    { method: 'POST', path: '/review/{id}', config: Social.review },    
+    { method: 'POST', path: '/editreview/{id}', config: Social.editReview },  
+    { method: 'GET', path: '/deletereview/{id}', config: Social.deleteReview },  
+    { method: 'POST', path: '/comment/{id}', config: Social.addComment },   
+    { method: 'GET', path: '/showcomment/{id}', config: Social.editCommentDisplay },
+    { method: 'POST', path: '/editcomment/{id}', config: Social.editComment },   
+    { method: 'GET', path: '/deletecomment/{id}', config: Social.deleteComment },
+    { method: 'GET', path: '/reply/{id}', config: Social.replyView },   
+    { method: 'GET', path: '/reply2reply/{id}', config: Social.replyToReplyView },       
+    { method: 'POST', path: '/addreply/{id}', config: Social.addReply }, 
+    { method: 'GET', path: '/deletereply/{id}', config: Social.deleteReply },   
+    { method: 'GET', path: '/showreply/{id}', config: Social.editReplyView },                                  
     { method: 'GET', path: '/category', config: Places.category },
     { method: 'POST', path: '/createcat', config: Places.addCategory },  
     { method: 'GET', path: '/deletecat/{_id}', config: Places.deleteCategory },     

@@ -7,12 +7,12 @@ const User = require('./app/models/user');
 const dotenv = require('dotenv');
 const handlebars = require('handlebars');
 
+
 const result = dotenv.config();
 if (result.error) {
   console.log(result.error.message);
   process.exit(1);
 } 
-
 
 async function init (){
 
@@ -25,6 +25,7 @@ async function init (){
     api_key: process.env.key,
     api_secret: process.env.secret
   };
+
 
 
 await server.register(Inert);
@@ -46,8 +47,10 @@ server.views({
   layout: true
 });
 
-handlebars.registerHelper("ifReviewByYou", function(reviewUser,loggedInuser,options) {
-  if (reviewUser != undefined || loggedInuser != undefined) {
+handlebars.registerHelper("ifMadeByYou", function(reviewUser,loggedInuser,options) {
+/*  console.log(reviewUser);
+  console.log(loggedInuser); */
+  if (reviewUser != undefined && loggedInuser != undefined) {
   let a = reviewUser;
   let b = loggedInuser;
   if (a.toString() == b.toString()){ 

@@ -40,7 +40,7 @@
                     </b>
               </div>
                 <div class="uk-width-expand"></div>
-                {{#ifReviewByYou userId ../user._id }}
+                {{#ifMadeByYou userId ../user._id }}
                 <div>
                     <a href="/showreview/{{_id}}" style="margin:0" class ="uk-align-center">
                         <i class="fas fa-pen" style="color:red; margin:5px;" title="Edit" pos="bottom" uk-tooltip></i>
@@ -51,7 +51,7 @@
                         <i class="fas fa-trash-alt" style="color:blue; margin:5px;" title="Delete" pos="bottom" uk-tooltip></i>
                     </a> 
                 </div>
-                {{/ifReviewByYou}}
+                {{/ifMadeByYou}}
             </div>                  
                 <div class="uk-card uk-text-break">
                     {{review}}
@@ -66,6 +66,81 @@
         </div>
 </div>
 <div class="uk-card uk-card-default uk-card-body uk-margin uk-padding-small">
-    <h3>Comments</h3>
+        <h3>Comments</h3>
+        <div class= "uk-flex">
+            <div class="uk-width-1-4"></div>
+            <div class="uk-width-expand">
+                <form action="/comment/{{place._id}}" method="POST">
+                <textarea class="uk-textarea" type="text" rows="3" name="comment" placeholder="Add Comment.."></textarea>
+                <button class="uk-button uk-button-primary uk-margin uk-align-right">OK</button> 
+                </form>
+            </div>
+        </div>
+        {{#if comments}}
+        {{#each comments}}
+        <div class="uk-card uk-card-body uk-background-muted uk-margin uk-text-break">
+            <div class="uk-flex">
+              <div class="uk-width-auto">
+                    <b>
+                    {{username}}
+                    {{dateAndTime}}
+                    </b>
+              </div>
+                <div class="uk-width-expand"></div>
+                     <a href="/reply/{{_id}}" style="margin:0" class ="uk-align-center">
+                        <i class="fas fa-comment" style="color:red; margin:5px;" title="Reply" pos="bottom" uk-tooltip></i>
+                    </a>                
+                {{#ifMadeByYou userId ../user._id }}
+                <div>
+                    <a href="/showcomment/{{_id}}" style="margin:0" class ="uk-align-center">
+                        <i class="fas fa-pen" style="color:green; margin:5px;" title="Edit" pos="bottom" uk-tooltip></i>
+                    </a> 
+                </div>           
+                <div>
+                    <a href="/deletecomment/{{_id}}" style="margin:0" class ="uk-align-center">
+                        <i class="fas fa-trash-alt" style="color:blue; margin:5px;" title="Delete" pos="bottom" uk-tooltip></i>
+                    </a> 
+                </div>
+                {{/ifMadeByYou}}
+            </div>  
+        {{comment}}
+        {{#each replies}}
+        <div class="uk-flex">
+            <div class="uk-width-1-4"></div>
+             <div class="uk-card uk-margin uk-width-expand">
+                <div class="uk-flex">
+                <div class-"wk-width-auto">
+                    <b>     
+                    {{this.username}}
+                    {{this.dateAndTime}}            
+                    </b>
+                </div>
+                <div class="uk-width-expand"></div>
+                         <a href="/reply2reply/{{_id}}" style="margin:0" class ="uk-align-center">
+                            <i class="fas fa-comment" style="color:red; margin:5px;" title="Reply" pos="bottom" uk-tooltip></i>
+                        </a>                
+                    {{#ifMadeByYou userId ../../user._id }}
+                    <div>
+                        <a href="/showreply/{{_id}}" style="margin:0" class ="uk-align-center">
+                            <i class="fas fa-pen" style="color:green; margin:5px;" title="Edit" pos="bottom" uk-tooltip></i>
+                        </a> 
+                    </div>           
+                    <div>
+                        <a href="/deletereply/{{_id}}" style="margin:0" class ="uk-align-center">
+                            <i class="fas fa-trash-alt" style="color:blue; margin:5px;" title="Delete" pos="bottom" uk-tooltip></i>
+                        </a> 
+                    </div>
+                    {{/ifMadeByYou}}
+                </div>
+            {{this.reply}}
+            </div> 
+        </div>
+        {{/each}}
+        </div>
+        {{/each}}
+        {{/if}}
+        {{#unless comments}}
+        <h3>No comments yet</h3>
+        {{/unless}}
 </div>
 </div>
