@@ -4,25 +4,25 @@
         "shane": {
             "name": "Shane Ryan",
             "email": "shanery86@gmail.com",
-            "password": "secret"
+            "password": "$2a$10$/RcNOV.G5NMeu2Yofruht.kYYQWb5z3c6XhcKym1.f06ryT7y/3CO"
         },
         "sarah":
         {
             "name": "Sarah Keane",
             "email": "saharakeane@gmail.com",
-            "password": "secret"
+            "password": "$2a$10$ZCNNdH8E8OE4crx25QKzKOzXcM3jgsNOMTMTvz4P5VvlYzy1HPfe2"
         },
         "cathy":
         {
             "name": "Catherine Ryan",
             "email": "cathy@gmail.com",
-            "password": "secret"
+            "password": "$2a$10$q9SCtN.IEyGqOte1Gs8FMuOaaK37QAuuwo00J9ijnFjBVhkM0C9sO"
         },
         "admin":
         {
             "name": "Admin",
             "email": "admin@admin.com",
-            "password": "admin123"
+            "password": "$2a$10$0x6NrAnrnFXk.pdsSSs8TuzjiNLeAPxcpwLK/TjzxIP2a0IyOJEmW"
         }
     },
         "categories": {
