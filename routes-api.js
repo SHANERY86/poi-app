@@ -1,5 +1,6 @@
 const Users = require('./app/api/users.js');
 const Places = require('./app/api/places.js');
+const SocialApi = require('./app/api/social-api');
 
 module.exports = [
     { method: 'GET', path: '/api/users', config: Users.find },
@@ -13,5 +14,8 @@ module.exports = [
     { method: 'POST', path: '/api/{id}/places', config: Places.create },
     { method: 'DELETE', path: '/api/places', config: Places.deleteAll },
     { method: 'DELETE', path: '/api/places/{id}', config: Places.deleteOne },
-    { method: 'DELETE', path: '/api/{id}/places', config: Places.deleteByUser}    
+    { method: 'DELETE', path: '/api/{id}/places', config: Places.deleteByUser},
+    { method: 'POST', path: '/api/ratings/{id}', config: SocialApi.setRatingForPlace }, 
+    { method: 'GET', path: '/api/ratings', config: SocialApi.getRatings },
+    { method: 'DELETE', path: '/api/ratings', config: SocialApi.deleteAllRatings },          
 ];

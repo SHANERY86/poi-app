@@ -70,6 +70,22 @@ class POIService {
         const response = await axios.delete(this.baseUrl + "/api/" + id + "/places");
         return response.data;
     }
+
+    async setRating(id, rating){
+        const response = await axios.post(this.baseUrl + "/api/ratings/"+ id, rating);
+        return response.data;
+    }
+
+    async getRatings() {
+        const response = await axios.get(this.baseUrl + "/api/ratings");
+        return response.data;
+    }
+
+    async deleteAllRatings() {
+        const response = await axios.delete(this.baseUrl + "/api/ratings");
+        return response.data;
+    }
+
 }
 
 module.exports = POIService;
