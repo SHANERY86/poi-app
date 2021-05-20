@@ -1,0 +1,19 @@
+{{> mainmenu subtitle="Edit Comment"}}
+{{#if comment}}
+<div class="uk-card uk-card-default uk-card-body">
+    <h3>Edit Comment</h3>
+    <form action="/editcomment/{{comment._id}}" method="POST">   
+    <textarea class="uk-textarea" rows="5" type="text" name="comment">{{comment.comment}}</textarea>
+    <button class="uk-button uk-button-primary uk-margin">SUBMIT</button>
+    </form>
+</div>
+{{/if}}
+{{#if reply}}
+<div class="uk-card uk-card-default uk-card-body">
+    <h3>Edit Comment</h3>
+    <form action="/editcomment/{{reply._id}}" method="POST">   
+    <textarea class="uk-textarea" rows="5" type="text" name="reply">{{reply.reply}}</textarea>
+    <button class="uk-button uk-button-primary uk-margin">SUBMIT</button>
+    </form>
+</div>
+{{/if}}

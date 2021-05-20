@@ -4,14 +4,15 @@ const Vision = require("@hapi/vision");
 const Cookie = require("@hapi/cookie");
 const ImageStore = require('./app/utils/image-store');
 const User = require('./app/models/user');
-//const dotenv = require('dotenv');
+const dotenv = require('dotenv');
+const handlebars = require('handlebars');
 
-/*const result = dotenv.config();
+
+const result = dotenv.config();
 if (result.error) {
   console.log(result.error.message);
   process.exit(1);
-} */
-
+} 
 
 async function init (){
 
@@ -24,6 +25,7 @@ async function init (){
     api_key: process.env.key,
     api_secret: process.env.secret
   };
+
 
 
 await server.register(Inert);
@@ -43,6 +45,18 @@ server.views({
   path: "./app/views",
   partialsPath: "./app/views/partials",
   layout: true
+});
+
+handlebars.registerHelper("ifMadeByYou", function(reviewUser,loggedInuser,options) {
+/*  console.log(reviewUser);
+  console.log(loggedInuser); */
+  if (reviewUser != undefined && loggedInuser != undefined) {
+  let a = reviewUser;
+  let b = loggedInuser;
+  if (a.toString() == b.toString()){ 
+  return options.fn(this); } 
+  return options.inverse(this);
+  }
 });
 
 server.auth.strategy('session', 'cookie', {
