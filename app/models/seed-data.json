@@ -61,7 +61,9 @@
         "user": "->users.shane",
         "category": "->categories.citiesShane",
         "lat": 40.69, 
-        "long": -74.04
+        "long": -74.04,
+        "username": "->users.shane.name",
+        "useremail": "->users.shane.email"
     },
     "chicago": {
         "name": "Chicago",
@@ -70,8 +72,9 @@
         "user": "->users.sarah",
         "category": "->categories.CitiesSarah",
         "lat": 41.88, 
-        "long": -87.62
-
+        "long": -87.62,
+        "username": "->users.sarah.name",
+        "useremail": "->users.sarah.email"
     },
     "copenhagen": {
         "name": "Copenhagen",
@@ -80,7 +83,9 @@
         "user": "->users.cathy",
         "category": "->categories.CitiesCathy",
         "lat": 55.67, 
-        "long": 12.56
+        "long": 12.56,
+        "username": "->users.cathy.name",
+        "useremail": "->users.cathy.email"
     }
     }
 

@@ -1,41 +1,9 @@
-{{> mainmenu subtitle="Your list of places"}}
+{{> mainmenu subtitle="Your personal list of places"}}
 <div class="uk-margin uk-card uk-flex uk-flex-center">
-    <a href="/places"><button class="uk-button uk-button-primary">VIEW ALL</button></a>
+    <a href="/socialplaces"><button class="uk-button uk-button-primary">SOCIAL</button></a>
+    <a href="/places"><button class="uk-button uk-button-primary uk-margin-left">VIEW ALL</button></a>
     <a href="/category"><button class="uk-button uk-button-primary uk-margin-left">VIEW BY CATEGORY</button></a>
 </div>
 {{#each places}}
-<div class="uk-card uk-card-default uk-margin">
-    <div class="uk-flex">
-        <div class="uk-width-1-3@m"> 
-            <img src="{{ image }}">
-        </div>
-        <div class="uk-padding uk-width-expand">
-            <h3 class="uk-card-title">{{name}}</h3>
-            <p>{{description}} </p>
-        <div class="uk-text-muted">
-                        {{#if lat}}
-                        {{#if long}}
-                        GPS: ({{lat}}, {{long}}) <br>                 
-                        Temp: {{temp}} °C |
-                        Feels Like: {{feelsLike}} °C |
-                        {{clouds}} |
-                        Wind Speed: {{windSpeed}} m/s |
-                        Humidity: {{humidity}} % 
-                        {{/if}}
-                        {{/if}}
-        </div>
-        </div>
-
-        <div>
-            <div class="uk-padding">
-                <a href="/showplace/{{_id}}" style="margin:0" class ="uk-align-center">
-                    <i class="fas fa-pen" style="color:red" title="Edit" pos="bottom" uk-tooltip></i>
-                </a>            
-                <a href="/deleteplace/{{_id}}" style="margin:0" class ="uk-align-center">
-                    <i class="fas fa-trash-alt" style="color:blue" title="Delete" pos="bottom" uk-tooltip></i>
-                </a> 
-            </div>
-    </div>           
-</div>  
-</div>
+{{> placecard personal='personal'}}        
 {{/each}}  

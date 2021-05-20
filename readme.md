@@ -1,4 +1,4 @@
-# Places of Interest App v1.4
+# Places of Interest App v1.5
 
 ## Description
 This app allows a user to set up an account and store information about places in the world that they are interested in. This is an assigment required for the completion of the Enterprise Web Development module in the HDip in Computer Science 2020 course at Waterford Institute of Technology.
@@ -18,12 +18,14 @@ go back to your Place List and click the pen icon on a POI, this view allows you
 ### Weather Report
 When you have set accurate GPS co-ordinates for a POI, you will recieve a weather report at the bottom of the POI. GPS co-ordinates can be optionally input when creating a POI or added later in the edit POI menu.
 
+### Social Features
+See POIs that other users have submitted using the POI Social link. Click into each POI, and see more information about them. Go and visit them, and then leave your opinion 
+by submitting you own rating and review. Have a discussion in the comments section.
+
 ## Admin functionality
 The admin dashboard can be accessed by entering '/admin' at the end of the app url in the browser. The admin password is pre-programmed into the password field for demo purposes.
 Inside the admin dashboard, an admin user can delete users, and also view their place lists to delete or amend any information to control the content displayed on the app
 
-## Placeholder Image
-This app uses a placeholder image "globe_binoc.img" found in app/public/images that is used when a user does not upload an image for a POI to keep the POI list neat. It is recommended you upload this placeholder, or your own, and change the placeholder URL where it seen in the code. Future releases will upload an image and provide a URL variable during initialisation. 
 
 ## Associated frameworks and plugins
 Name|Function|
@@ -39,22 +41,6 @@ Name|Function|
 |Font Awesome|Icon styling set
 |dotenv|initialisation file manager
 
-<br />
-
-To install above:
-```
-npm install @hapi/hapi
-npm install @hapi/inert
-npm install @hapi/vision
-npm install @hapi/cookie
-npm install handlebars
-npm install cloudinary
-npm install mongoose
-npm install dotenv
-```
-See layout.hbs for UIkit and Font Awesome initialisation
-
-<br>
 
 To use mongoose and cloudinary, you must setup accounts, and declare your accout information to link the app to them<br>
 This app is setup to initialise within a .env file with a layout as below. <br>
@@ -95,6 +81,11 @@ apiKey=your-api-key
 * Exposed basic API endpoints
 * Created basic Unit Tests
 * Implemented sanitisation of inputs
+
+### v1.5
+* Social features
+* Rating and Review
+* Comments
 
 ## Roadmap
 * Social features (View other peoples POIs, commenting, rating)

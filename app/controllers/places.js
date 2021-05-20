@@ -6,6 +6,7 @@ const Joi = require('@hapi/joi');
 const Boom = require('@hapi/boom');
 const sanitizeHtml = require('sanitize-html');
 
+
 const Places = {
     home: {
         auth: false,
@@ -86,6 +87,8 @@ const Places = {
                 newPlace.windSpeed = weatherReport.windSpeed;
                 newPlace.humidity = weatherReport.humidity; 
             }
+            newPlace.username = user.name;
+            newPlace.useremail = user.email;
             await newPlace.save();
             return h.redirect("/places");
         } catch(err) {
@@ -119,7 +122,37 @@ const Places = {
                 }
             })   
             const places = await Place.placeDb.find({ user: user._id }).lean();       
-            return h.view("places", { places: places, });           
+            return h.view("places", { places: places });           
+        }
+    },
+    socialPlaces: {
+        handler: async function (request, h) {
+            let places = await Place.placeDb.find( { } );
+            places.forEach(async function(place) {
+                if(place.lat && place.long){
+                let placeId = place._id;
+                let placeData = await Place.placeDb.findById(placeId);
+                let weatherReport = await Weather.getWeather(place.lat,place.long);
+                placeData.temp = weatherReport.temp;
+                placeData.feelsLike = weatherReport.feelsLike;
+                placeData.clouds = weatherReport.clouds;
+                placeData.windSpeed = weatherReport.windSpeed;
+                placeData.humidity = weatherReport.humidity; 
+                await placeData.save();
+                }
+            })
+            places = await Place.placeDb.find({ }).lean(); 
+            return h.view("socialplaces", { places: places, });                       
+    }
+},
+    onePlace: {
+        handler: async function (request, h) {
+            const placeId = request.params.id;
+            const place = await Place.placeDb.findById(placeId).lean();
+            const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();
+            const user = await User.findById(request.auth.credentials.id).lean();    
+            const placeComments = await Place.commentsDb.find( { place: place } ).lean();  
+            return h.view("place", { place: place, reviews: placeReviews, user: user, comments: placeComments });
         }
     },
     //displays the POI list for a user as a logged in admin
@@ -278,8 +311,8 @@ const Places = {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
-            const imageId = await ImageStore.getImageId(place.url);
-            await ImageStore.deleteImage(imageId);
+ //           const imageId = await ImageStore.getImageId(place.url);
+//            await ImageStore.deleteImage(imageId);
             const user = await User.findById(place.user).lean();
             await place.remove();
             const places = await Place.placeDb.find({ user: user._id }).lean(); 
@@ -328,7 +361,20 @@ const Places = {
             await category.remove();
             return h.redirect("/category");
         }
-    } 
+    },
+    async loadPlaceInfo(placeId, loggedInUserId) {
+        const place = await Place.placeDb.findById(placeId).lean();
+        const user = await User.findById(loggedInUserId).lean();
+        const placeReviews = await Place.reviewDb.find( { place: place }).lean();
+        const placeComments = await Place.commentsDb.find( { place: place }).lean();
+        const placeInfo = {
+            place: place,
+            loggedInUser: user,
+            reviews: placeReviews,
+            comments: placeComments
+        }
+        return placeInfo;
+    }
 };
 
-module.exports = Places;
+module.exports = Places 

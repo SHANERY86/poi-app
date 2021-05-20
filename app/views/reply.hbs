@@ -1,0 +1,31 @@
+{{> mainmenu subtitle="Reply to Comment"}}
+{{#if comment}}
+<div class="uk-card uk-card-body uk-card-default">
+    <div class="uk-card uk-card-body uk-background-muted uk-margin uk-text-break">
+        <b>
+        {{comment.username}}
+        {{comment.dateAndTime}}
+        </b> <br>
+        {{comment.comment}}
+    </div>
+    <form action="/addreply/{{comment._id}}" method="POST">
+    <textarea class="uk-textarea" rows="3" type="text" name="reply" placeholder="Add Reply.."></textarea> 
+    <button class="uk-button uk-button-primary">OK</button> 
+    </form>
+</div>
+{{/if}}
+{{#if reply}}
+<div class="uk-card uk-card-body uk-card-default">
+    <div class="uk-card uk-card-body uk-background-muted uk-margin uk-text-break">
+        <b>
+        {{reply.username}}
+        {{reply.dateAndTime}}
+        </b> <br>
+        {{reply.reply}}
+    </div>
+    <form action="/addreply/{{reply._id}}" method="POST">
+    <textarea class="uk-textarea" rows="3" type="text" name="reply" placeholder="Add Reply.."></textarea> 
+    <button class="uk-button uk-button-primary">OK</button> 
+    </form>
+</div>
+{{/if}}
