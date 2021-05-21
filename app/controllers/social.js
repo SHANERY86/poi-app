@@ -197,17 +197,9 @@ const Social = {
             commentForLoading = comment;
             }
             if(!comment){
-                var commentWithReply = null;
-                const comments = await Place.commentsDb.find({}).lean();
-                comments.forEach(function(comment){
-                    const replies = comment.replies;
-                    for(let i = 0; i < replies.length; i++){
-                        if(replies[i]._id == inputId){
-                            commentWithReply = comment;
-                        }
-                    }
-                })
-                const commentToUpdate = await Place.commentsDb.findById(commentWithReply._id);
+                const replyInfo = await Social.getCommentAndReplyIndex(inputId);
+                const returnedComment = replyInfo.comment;
+                const commentToUpdate = await Place.commentsDb.findById(returnedComment._id);
                 const dateAndTime = Social.getDateAndTime();
                 const input = request.payload.reply;
                 const reply = {
@@ -247,20 +239,11 @@ const Social = {
             commentForLoading = await Place.commentsDb.findById(comment._id).lean();
             } 
             if(!comment){
-                var commentWithReply = null;
-                var replyIndex = null;
-                const comments = await Place.commentsDb.find({}).lean();
-                comments.forEach(function(comment){
-                    const replies = comment.replies;
-                    for(let i = 0; i < replies.length; i++){
-                        if(replies[i]._id == inputId){
-                            commentWithReply = comment;
-                            replyIndex = i;
-                        }
-                    }
-                })
-                const commentToUpdate = await Place.commentsDb.findById(commentWithReply._id);
-                commentToUpdate.replies[replyIndex].reply = request.payload.reply;
+                const replyInfo = await Social.getCommentAndReplyIndex(inputId);
+                const returnedComment = replyInfo.comment;
+                const index = replyInfo.replyIndex;
+                const commentToUpdate = await Place.commentsDb.findById(returnedComment._id);
+                commentToUpdate.replies[index].reply = request.payload.reply;
                 await commentToUpdate.save();  
                 commentForLoading = await Place.commentsDb.findById(commentToUpdate._id).lean();                         
             }           
@@ -291,21 +274,12 @@ const Social = {
         handler: async function(request, h) {
             const userid = request.auth.credentials.id;
             const replyId = request.params.id;
-            var commentWithReply = null;
-            var replyIndex = null;
-            const comments = await Place.commentsDb.find({});
-            comments.forEach(function(comment){
-                const replies = comment.replies;
-                for(let i = 0; i < replies.length; i++){
-                    if(replies[i]._id == replyId){
-                        commentWithReply = comment;
-                        replyIndex = i;
-                    }
-                }
-            })
-            commentWithReply.replies[replyIndex].remove();
-            await commentWithReply.save();
-            const place = await Place.placeDb.findById(commentWithReply.place).lean();
+            const replyInfo = await Social.getCommentAndReplyIndex(replyId);
+            const comment = replyInfo.comment;
+            const index = replyInfo.replyIndex;
+            comment.replies[index].remove();
+            await comment.save();
+            const place = await Place.placeDb.findById(comment.place).lean();
             const placeInfo = await Places.loadPlaceInfo(place._id,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
@@ -313,6 +287,21 @@ const Social = {
                 user: placeInfo.loggedInUser, 
                 comments: placeInfo.comments } );                      
         }
+    },
+    async getCommentAndReplyIndex(replyId) {
+        var returnedComment = null;
+        var replyIndex = null;
+        const comments = await Place.commentsDb.find({});
+        comments.forEach(function(comment){
+            const replies = comment.replies;
+            for(let i = 0; i < replies.length; i++){
+                if(replies[i]._id == replyId){
+                    returnedComment = comment;
+                    replyIndex = i;
+                }
+            }
+        })
+        return( { comment: returnedComment, replyIndex: replyIndex });
     },
     getDateAndTime() {
         const d = new Date();
