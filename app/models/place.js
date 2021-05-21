@@ -1,4 +1,3 @@
-const { number } = require("@hapi/joi");
 const Mongoose = require("mongoose");
 const Schema = Mongoose.Schema;
 
@@ -82,6 +81,10 @@ const commentsSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: "User",
         },
+        commentId: {
+            type: Schema.Types.ObjectId,
+            ref: "Comment",
+        },
         username: String,
         reply: String,
         dateAndTime: String,
@@ -95,9 +98,17 @@ categorySchema.statics.findAll = function() {
     return this.find({});
   }
 
-  ratingSchema.statics.findAll = function() {
+ratingSchema.statics.findAll = function() {
     return this.find({});
   }
+
+reviewSchema.statics.findAll = function() {
+    return this.find({});
+}
+
+commentsSchema.statics.findAll = function() {
+    return this.find({});
+}
 
 
 const placeDb = Mongoose.model("Place", placeSchema);
