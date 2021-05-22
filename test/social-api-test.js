@@ -9,12 +9,23 @@ const Social = require("../app/controllers/social");
 suite("Social API tests", function ()  {
     let places = fixtures.places;
     let users = fixtures.users;
+    let newUser = fixtures.newUser;
 
     const poiService = new POIService(fixtures.appHost);
 
+    suiteSetup(async function () {
+        await poiService.deleteAllUsers();
+        const returnedUser = await poiService.createUser(newUser);
+        const response = await poiService.authenticate(newUser);
+      });
+    
+      suiteTeardown(async function () {
+        await poiService.deleteAllUsers();
+        poiService.clearAuth();
+      }) 
+
     setup(async function () {
         await poiService.deleteAllPlaces();
-        await poiService.deleteAllUsers();
         await poiService.deleteAllRatings();
         await poiService.deleteAllReviews();
         await poiService.deleteAllComments();
@@ -22,7 +33,6 @@ suite("Social API tests", function ()  {
 
     teardown(async function () {
         await poiService.deleteAllPlaces();
-        await poiService.deleteAllUsers();
         await poiService.deleteAllRatings();
         await poiService.deleteAllReviews();
         await poiService.deleteAllComments();

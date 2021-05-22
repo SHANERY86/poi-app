@@ -15,11 +15,12 @@ if (result.error) {
   process.exit(1);
 } 
 
-async function init (){
+const server = Hapi.server({
+  port: process.env.PORT || 3000,
+  routes: { cors: true },
+});
 
-  const server = Hapi.server({
-    port: process.env.PORT || 3000,
-  });
+async function init (){
 
   const credentials = {
     cloud_name: process.env.name,
@@ -32,7 +33,7 @@ await server.register(Vision);
 await server.register(Cookie);
 await server.register(require('hapi-auth-jwt2'));
 server.validator(require("@hapi/joi"));
-await server.start();
+
 require('./app/models/db')
 
 ImageStore.configure(credentials);
@@ -79,7 +80,7 @@ server.auth.default('session');
 
 server.route(require("./routes"));
 server.route(require("./routes-api.js"));
-
+await server.start();
 console.log(`Server started at ${server.info.uri}`);
 }
 

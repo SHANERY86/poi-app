@@ -11,27 +11,32 @@ suite("User API tests", function() {
 
     const poiService = new POIService(fixtures.appHost);
 
-    setup(async function () {
+    suiteSetup(async function () {
         await poiService.deleteAllUsers();
-    });
-
-    teardown(async function () {
-        await poiService.deleteAllUsers();
-    });
-
-    test("create a user", async function () {
         const returnedUser = await poiService.createUser(newUser);
-        assert(_.some([returnedUser], newUser), "returnedUser must be a superset of newUser");
+        const response = await poiService.authenticate(newUser);
+      });
+    
+      suiteTeardown(async function () {
+        await poiService.deleteAllUsers();
+        poiService.clearAuth();
+      }) 
+   
+   
+    test("create a user", async function () {
+        const returnedUser = await poiService.createUser(users[0]);
+        assert(_.some([returnedUser], users[0]), "returnedUser must be a superset of newUser");
         assert.isDefined(returnedUser._id);
     });
 
     test("get User", async function () {
-        const c1 = await poiService.createUser(newUser);
+        const c1 = await poiService.createUser(users[0]);
         const c2 = await poiService.getUser(c1._id);
         assert.deepEqual(c1,c2);
     });
 
     test("get invalid user", async function () {
+        const returnedUser = await poiService.createUser(newUser);
         const c1 = await poiService.getUser("1234");
         assert.isNull(c1);
         const c2 = await poiService.getUser("012345678901234567890123");
@@ -39,11 +44,11 @@ suite("User API tests", function() {
       });
 
       test("delete a User", async function () {
-        let c = await poiService.createUser(newUser);
+        const c = await poiService.createUser(users[0]);
         assert(c._id != null);
         await poiService.deleteOneUser(c._id);
-        c = await poiService.getUser(c._id);
-        assert(c == null);
+       const d = await poiService.getUser(c._id);
+        assert(d == null);
       }); 
 
 

@@ -6,14 +6,14 @@ const User = require('../models/user');
 
 const Places = {
     find: {
-        auth: false,
+        auth : { strategy: "jwt" },
         handler: async function (request, h) {
             const places = await Place.placeDb.findAll();
             return places;
         }
     },
     findOne: {
-        auth: false,
+        auth : { strategy: "jwt" },
         handler: async function (request, h) {
         try {
             const place = await Place.placeDb.findOne({ _id: request.params.id } );
@@ -28,7 +28,7 @@ const Places = {
         }
     },
     findByUser: {
-      auth: false,
+      auth : { strategy: "jwt" },
       handler: async function (request, h) {
         try {
           const places = await Place.placeDb.find( { user: request.params.id });
@@ -43,7 +43,7 @@ const Places = {
       }
     },
     create: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {
           const data = request.payload;
           const user = await User.findOne({ _id: request.params.id });
@@ -63,14 +63,14 @@ const Places = {
         }
       },
       deleteAll: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {
-          await Place.placeDb.remove({});
-          return { success: true };
-        }
+            await Place.placeDb.remove({});
+            return { success: true };
+          }
       },
       deleteOne: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function(request, h) {
           const response = await Place.placeDb.deleteOne({ _id: request.params.id });
           if (response.deletedCount == 1) {
@@ -80,7 +80,7 @@ const Places = {
         }
       },
       deleteByUser: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function(request, h) {
           const response = await Place.placeDb.deleteMany( { user: request.params.id } )
           if (response.deletedCount >= 1) {
