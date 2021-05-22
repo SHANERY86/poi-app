@@ -34,4 +34,6 @@ module.exports = [
     { method: 'POST', path: '/api/commentreplyedit/{id}', config: SocialApi.editReply },
     { method: 'DELETE', path: '/api/commentreplydelete/{id}', config: SocialApi.deleteReply }, 
 
+    { method: 'POST', path: '/api/users/authenticate', config: Users.authenticate },   
+
 ];

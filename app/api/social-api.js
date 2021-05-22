@@ -6,14 +6,14 @@ const Social = require("../controllers/social");
 
 const SocialApi = {
     deleteAllRatings: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
         await Place.ratingDb.remove({});
         return { success: true };
     }
 },
     setRatingForPlace: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
         const place = await Place.placeDb.findById(request.params.id);
         const ratingInput = request.payload.rating; 
@@ -28,14 +28,14 @@ const SocialApi = {
     }
 },
     getRatings: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const ratings = await Place.ratingDb.findAll();
             return ratings;       
     }
 },
     makeReview: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {
             const inputReview = request.payload;
             const review = new Place.reviewDb(inputReview);
@@ -44,7 +44,7 @@ const SocialApi = {
         }
     },
     editReview: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {  
             const reviewId = request.params.id;
             const review = await Place.reviewDb.findById(reviewId);
@@ -55,7 +55,7 @@ const SocialApi = {
     }
 },
     deleteReview: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {
             const review = await Place.reviewDb.findById(request.params.id);
             await review.remove();
@@ -63,7 +63,7 @@ const SocialApi = {
         }
           },
     deleteAllReviews: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {
             const reviews = Place.reviewDb.findAll();
             await reviews.remove();
@@ -71,14 +71,14 @@ const SocialApi = {
         }
     },
     getReviews: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {
             const reviews = Place.reviewDb.findAll();
             return reviews;    
         }    
     },
     getReview: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {       
             const review = await Place.reviewDb.findById(request.params.id);
             return review;
@@ -86,7 +86,7 @@ const SocialApi = {
     },
 
     getAllComments: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) {      
             const comments = await Place.commentsDb.findAll();
             return comments;  
@@ -94,7 +94,7 @@ const SocialApi = {
     },
 
     getComment: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const comment = await Place.commentsDb.findById(request.params.id);
             return comment             
@@ -102,7 +102,7 @@ const SocialApi = {
     },
 
     deleteAllComments: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const comments = Place.commentsDb.findAll();
             if(comments){
@@ -113,7 +113,7 @@ const SocialApi = {
     },
 
     makeComment: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const input = request.payload;
             const comment = new Place.commentsDb(input);
@@ -123,7 +123,7 @@ const SocialApi = {
     },
 
     deleteComment: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const comment = await Place.commentsDb.findById(request.params.id);
             await comment.remove();
@@ -132,7 +132,7 @@ const SocialApi = {
     },
 
     editComment: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const comment = await Place.commentsDb.findById(request.params.id);
             const input = request.payload;
@@ -142,7 +142,7 @@ const SocialApi = {
         }      
     },
     makeReply: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const comment = await Place.commentsDb.findById(request.params.id);    
             const reply = request.payload;
@@ -152,7 +152,7 @@ const SocialApi = {
         }
     },
    editReply: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const replyId = request.params.id;
             const replyEdit = request.payload.edit;
@@ -165,7 +165,7 @@ const SocialApi = {
         }  
     },
     deleteReply: {
-        auth: false,
+        auth: { strategy: "jwt" },
         handler: async function (request, h) { 
             const replyId = request.params.id;
             const replyInfo = await Social.getCommentAndReplyIndex(replyId);

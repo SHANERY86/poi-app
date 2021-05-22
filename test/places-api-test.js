@@ -8,22 +8,32 @@ const _ = require("lodash");
 suite("Places API tests", function ()  {
     let places = fixtures.places;
     let users = fixtures.users;
-    let categories = fixtures.categories;
 
     const poiService = new POIService(fixtures.appHost);
+   
+    let newUser = fixtures.newUser;
+
+    suiteSetup(async function () {
+        const returnedUser = await poiService.createUser(newUser);
+        const response = await poiService.authenticate(newUser);
+        await poiService.deleteAllPlaces();
+      });
+    
+      suiteTeardown(async function () {
+        await poiService.deleteAllUsers();
+        poiService.clearAuth();
+      });
 
     setup(async function () {
         await poiService.deleteAllPlaces();
-        await poiService.deleteAllUsers();
     })
 
     teardown(async function () {
-        await poiService.deleteAllPlaces();
-        await poiService.deleteAllUsers();
     });
 
-    test("create a place", async function () {
-        const user = await poiService.createUser(users[0]);
+    test("create a place", async function () {   
+        const user = await poiService.createUser(users[0]); 
+        const response = await poiService.authenticate(user); 
         await poiService.createPlace(user._id, places[0]);
         const returnedPlaces = await poiService.getPlaces();
         assert.equal(returnedPlaces.length, 1);
@@ -32,6 +42,7 @@ suite("Places API tests", function ()  {
 
     test("create multiple places", async function () {
         const user = await poiService.createUser(users[0]);
+        const response = await poiService.authenticate(user); 
         for (var i = 0; i < places.length; i++) {
             await poiService.createPlace(user._id, places[i]);
         }
@@ -45,6 +56,7 @@ suite("Places API tests", function ()  {
 
     test("delete all places", async function () {
         const user = await poiService.createUser(users[0]);
+        const response = await poiService.authenticate(user); 
         for (var i = 0; i < places.length; i++) {
             await poiService.createPlace(user._id, places[i]);
         }
@@ -58,7 +70,9 @@ suite("Places API tests", function ()  {
 
     test("delete all places for user", async function () {
         const u1 = await poiService.createUser(users[0]);
+        await poiService.authenticate(u1); 
         const u2 = await poiService.createUser(users[1]);
+        await poiService.authenticate(u2); 
         for (var i = 0; i < 2; i++) {
             await poiService.createPlace(u1._id, places[i]);
         }
