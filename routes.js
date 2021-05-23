@@ -3,6 +3,7 @@
 const Places = require("./app/controllers/places");
 const Accounts = require("./app/controllers/accounts");
 const Social = require("./app/controllers/social")
+const NoticeBoard = require("./app/controllers/noticeboard");
 
 module.exports = [
     { method: 'GET', path: '/', config: Places.home },
@@ -50,7 +51,9 @@ module.exports = [
     { method: 'GET', path: '/admindeleteacc/{_id}', config: Accounts.adminDeleteUser },        
     { method: 'GET', path: '/admin', config: Accounts.adminLoginView },
     { method: 'POST', path: '/adminlogin', config: Accounts.adminLogin },
-    { method: 'GET', path: '/adminview', config: Accounts.adminView },             
+    { method: 'GET', path: '/adminview', config: Accounts.adminView },       
+    { method: 'GET', path: '/noticeboard', config: NoticeBoard.viewNoticeBoard }, 
+    { method: 'GET', path: '/map/{id}', config: Places.map },       
     {
         method: "GET",
         path: "/{param*}",

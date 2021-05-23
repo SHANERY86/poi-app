@@ -1,0 +1,79 @@
+{{> mainmenu subtitle="Notice board"}}
+{{#if justnow}}
+<h3>Just Now</h3>
+{{/if}}
+    {{#each justnow}}
+<div class="uk-card uk-margin uk-card-default">
+    <div class="uk-flex">
+    <div class="uk-width-1-3">
+        <img src="{{placeimg}}">
+    </div>
+    <div class="uk-width-expand uk-card uk-card-body uk-padding-small">
+        <h3>{{placename}}</h3>
+        <div class="uk-card uk-card-default uk-card-body uk-background-muted uk-width-auto uk-text-break uk-padding-small">
+            {{username}} made a {{type}}: <br> <br>
+            {{content}}</div>
+    </div>
+    </div>
+
+</div>
+    {{/each}}
+    {{#if today}}
+<h3>Today</h3>
+{{/if}}
+    {{#each today}}
+<div class="uk-card uk-margin uk-card-default">
+    <div class="uk-flex">
+    <div class="uk-width-1-3">
+        <img src="{{placeimg}}">
+    </div>
+    <div class="uk-width-expand uk-card uk-card-body uk-padding-small">
+        <h3>{{placename}}</h3>
+        <div class="uk-card uk-card-default uk-card-body uk-background-muted uk-width-auto uk-text-break uk-padding-small">
+            {{username}} made a {{type}}: <br> <br>
+            {{content}}</div>
+    </div>
+    </div>
+
+</div>
+    {{/each}}
+    {{#if yesterday}}
+    <h3>Yesterday</h3>
+    {{/if}}
+        {{#each yesterday}}
+<div class="uk-card uk-margin uk-card-default">
+    <div class="uk-flex">
+    <div class="uk-width-1-3">
+        <img src="{{placeimg}}">
+    </div>
+    <div class="uk-width-expand uk-card uk-card-body uk-padding-small">
+        <h3>{{placename}}</h3>
+        <div class="uk-card uk-card-default uk-card-body uk-background-muted uk-width-auto uk-text-break uk-padding-small">
+            {{username}} made a {{type}}: <br> <br>
+            {{content}}</div>
+    </div>
+    </div>
+
+</div>
+    {{/each}}
+    {{#if later}}
+    {{#each later}}
+    <h3>{{date}}</h3>
+    {{#each events}}
+    <div class="uk-card uk-margin uk-card-default">
+    <div class="uk-flex">
+    <div class="uk-width-1-3">
+        <img src="{{placeimg}}">
+    </div>
+    <div class="uk-width-expand uk-card uk-card-body uk-padding-small">
+        <h3>{{placename}}</h3>
+        <div class="uk-card uk-card-default uk-card-body uk-background-muted uk-width-auto uk-text-break uk-padding-small">
+            {{username}} made a {{type}}: <br> <br>
+            {{content}}</div>
+    </div>
+    </div>
+
+</div>
+    {{/each}}
+    {{/each}}
+    {{/if}}

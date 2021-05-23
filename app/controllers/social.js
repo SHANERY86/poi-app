@@ -3,11 +3,14 @@
 const Place = require("../models/place");
 const User = require("../models/user");
 const Places = require("./places");
+const Boom = require('@hapi/boom');
+const sanitizeHtml = require('sanitize-html');
 
 const Social = {
     rating: {
         handler: async function (request, h) {
             const userid = request.auth.credentials.id;
+            try{
             const user = await User.findById(userid);
             const placeId = request.params.id;
             const place = await Place.placeDb.findById(placeId).lean();
@@ -38,12 +41,28 @@ const Social = {
              placeObj.numberOfRatings = index;
              placeObj.rating = Math.round(ratingsAvg * 10)/10;
              await placeObj.save();
+             const dateAndTime = Social.getDateAndTime();
+             const event = new Place.eventDb({
+                 type: "rating",
+                 dateAndTime: dateAndTime.dateAndTime,
+                 utc: dateAndTime.utc,
+                 dayAndMonth: dateAndTime.dayAndMonth,
+                 content: request.payload.rating.toString() + " out of 5.0",
+                 placename: place.name,
+                 placeimg: place.image,
+                 username: user.name
+             })
+             event.save();
              const placeInfo = await Places.loadPlaceInfo(placeId,user._id);
              return h.view("place", { 
                  place: placeInfo.place, 
                  reviews: placeInfo.reviews, 
                  user: placeInfo.loggedInUser, 
-                 comments: placeInfo.comments } );        
+                 comments: placeInfo.comments } );   
+             }
+             catch (err) {
+                return h.view("errorpage", { errors: [{ message: err.message }] });                
+             }     
          }
     },
     writeReview: {
@@ -56,25 +75,47 @@ const Social = {
     review: {
         handler: async function(request, h) {
             const placeId = request.params.id;
-            const place = await Place.placeDb.findById(placeId);
             const userid = request.auth.credentials.id;
+            try{
+            const place = await Place.placeDb.findById(placeId);
             const user = await User.findById(userid);
             const currentDateAndTime = Social.getDateAndTime();
-            const inputReview = request.payload.review; 
+            const inputReview = request.payload.review;
+            const sanitizedReview = sanitizeHtml(inputReview);
+            if(sanitizedReview == ""){
+                const message = "Your review has been blocked for security reasons";
+                throw Boom.badData(message);
+            } 
             const review = new Place.reviewDb({
                 userId: userid,
                 username: user.name,
                 place: place,
                 review: inputReview,
-                dateAndTime: currentDateAndTime
+                dateAndTime: currentDateAndTime.dateAndTime,
             })
             await review.save();
+            const event = new Place.eventDb({
+                type: "review",
+                dateAndTime: currentDateAndTime.dateAndTime,
+                dayAndMonth: currentDateAndTime.dayAndMonth,
+                utc: currentDateAndTime.utc,
+                content: sanitizedReview,
+                placename: place.name,
+                placeimg: place.image,
+                username: user.name
+            })
+            event.save();
             const placeInfo = await Places.loadPlaceInfo(placeId,user._id);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );        
+                comments: placeInfo.comments } );      
+            }
+            catch (err) {
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });          
+            } 
         }
     },
     editReviewDisplay: {
@@ -88,20 +129,33 @@ const Social = {
         handler: async function(request, h) {
             const userid = request.auth.credentials.id;
             const reviewId = request.params.id;
+            try{
             const review = await Place.reviewDb.findById( { _id: reviewId });
-            review.review = request.payload.review;
+            const reviewEdit = request.payload.review;
+            const sanitisedEdit = sanitizeHtml(reviewEdit);
+            if(sanitisedEdit == ""){
+                const message = "Your review has been blocked for security reasons";
+                throw Boom.badData(message);
+            } 
+            review.review = sanitisedEdit;
             const placeId = review.place;
             await review.save();
-            const placeInfo = await Places.loadPlaceInfo(placeId,userid);
+            const placeInfo = await Places.loadPlaceInfo(placeId,userid);           
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );        
+                comments: placeInfo.comments } );      
+            }
+            catch (err) {
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });          
+            }               
         }
     },
     deleteReview: {
         handler: async function(request, h) {
+            try{
             const userid = request.auth.credentials.id;            
             const review = await Place.reviewDb.findById( { _id: request.params.id } );
             const placeId = review.place;
@@ -112,30 +166,58 @@ const Social = {
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
                 comments: placeInfo.comments } );        
+            }
+            catch (err) {
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });               
+            }
         }          
     },
     addComment: {
         handler: async function(request, h) {
+            try{
             const user = await User.findById(request.auth.credentials.id);
             const placeId = request.params.id;
             const place = await Place.placeDb.findById(placeId);
             const input = request.payload.comment;
+            const sanitisedInput = sanitizeHtml(input);
+            if(sanitisedInput == ""){
+                const message = "Your comment was blocked for security reasons";
+                throw Boom.badData(message);
+            }
             const currentDateAndTime = Social.getDateAndTime();
             const comment = new Place.commentsDb({
                 userId: user._id,
                 username: user.name,
                 place: place,
-                comment: input,
-                dateAndTime: currentDateAndTime,
+                comment: sanitisedInput,
+                dateAndTime: currentDateAndTime.dateAndTime,
             })
             await comment.save();
+            const event = new Place.eventDb({
+                type: "comment",
+                dateAndTime: currentDateAndTime.dateAndTime,
+                utc: currentDateAndTime.utc,
+                dayAndMonth: currentDateAndTime.dayAndMonth,
+                content: sanitisedInput,
+                placename: place.name,
+                placeimg: place.image,
+                username: user.name
+            })
+            event.save();
             const placeInfo = await Places.loadPlaceInfo(placeId,user._id);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
                 comments: placeInfo.comments } );        
-        }
+            }
+            catch(err){
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });          
+            }      
+            }
+
     },
     replyView: {
         handler: async function(request, h) { 
@@ -178,6 +260,7 @@ const Social = {
     },
     addReply: {
         handler: async function(request, h) { 
+            try{
             const inputId = request.params.id;
             const comment = await Place.commentsDb.findById(inputId);
             var commentForLoading = null;
@@ -186,38 +269,64 @@ const Social = {
             if(comment){
             const dateAndTime = Social.getDateAndTime();
             const input = request.payload.reply;
+            const sanitisedInput = sanitizeHtml(input);
+            if(sanitisedInput == ""){
+                const message = "Your comment was blocked for security reasons";
+                throw Boom.badData(message);
+            }            
             const reply = {
                 userId: userid,
                 username: user.name,
-                reply: input,
-                dateAndTime: dateAndTime
+                reply: sanitisedInput,
+                dateAndTime: dateAndTime.dateAndTime
             }
             comment.replies.push(reply);
             await comment.save();
+            const place = await Place.placeDb.findById( comment.place ).lean();
+            const event = new Place.eventDb({
+                type: "reply",
+                dateAndTime: dateAndTime.dateAndTime,
+                utc: dateAndTime.utc,
+                dayAndMonth: dateAndTime.dayAndMonth,
+                content: sanitisedInput,
+                placename: place.name,
+                placeimg: place.image,
+                username: user.name
+            })
+            await event.save();
             commentForLoading = comment;
             }
             if(!comment){
-                var commentWithReply = null;
-                const comments = await Place.commentsDb.find({}).lean();
-                comments.forEach(function(comment){
-                    const replies = comment.replies;
-                    for(let i = 0; i < replies.length; i++){
-                        if(replies[i]._id == inputId){
-                            commentWithReply = comment;
-                        }
-                    }
-                })
-                const commentToUpdate = await Place.commentsDb.findById(commentWithReply._id);
+                const replyInfo = await Social.getCommentAndReplyIndex(inputId);
+                const returnedComment = replyInfo.comment;
+                const commentToUpdate = await Place.commentsDb.findById(returnedComment._id);
                 const dateAndTime = Social.getDateAndTime();
                 const input = request.payload.reply;
+                const sanitisedInput = sanitizeHtml(input);
+                if(sanitisedInput == ""){
+                    const message = "Your comment was blocked for security reasons";
+                    throw Boom.badData(message);
+                }            
                 const reply = {
                     userId: userid,
                     username: user.name,
-                    reply: input,
-                    dateAndTime: dateAndTime
+                    reply: sanitisedInput,
+                    dateAndTime: dateAndTime.dateAndTime
                 }
                 commentToUpdate.replies.push(reply);
                 await commentToUpdate.save();
+                const place = await Place.placeDb.findById(commentToUpdate.place).lean();                
+                const event = new Place.eventDb({
+                    type: "reply",
+                    dateAndTime: dateAndTime.dateAndTime,
+                    utc: dateAndTime.utc,
+                    dayAndMonth: dateAndTime.dayAndMonth,
+                    content: sanitisedInput,
+                    placename: place.name,
+                    placeimg: place.image,
+                    username: user.name
+                })
+                await event.save();
                 commentForLoading = commentToUpdate;
             }
             const placeInfo = await Places.loadPlaceInfo(commentForLoading.place,user._id);
@@ -226,6 +335,10 @@ const Social = {
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
                 comments: placeInfo.comments } );        
+        } catch (err) {
+            return h.view("errorpage", {
+                errors: [{ message: err.message }] });          
+        }               
         }                           
     },
     editCommentDisplay: {
@@ -237,30 +350,34 @@ const Social = {
     },
     editComment: {
         handler: async function(request, h) {
+            try{
             const userid = request.auth.credentials.id;
             const inputId = request.params.id;
             var commentForLoading = null;
             const comment = await Place.commentsDb.findById(inputId);
             if(comment){
-            comment.comment = request.payload.comment;
+            const input = request.payload.comment;
+            const sanitisedInput = sanitizeHtml(input);
+            if(sanitisedInput == ""){
+                const message = "Your comment edit was blocked for security reasons";
+                throw Boom.badData(message);
+            }             
+            comment.comment = sanitisedInput;
             await comment.save();
             commentForLoading = await Place.commentsDb.findById(comment._id).lean();
             } 
             if(!comment){
-                var commentWithReply = null;
-                var replyIndex = null;
-                const comments = await Place.commentsDb.find({}).lean();
-                comments.forEach(function(comment){
-                    const replies = comment.replies;
-                    for(let i = 0; i < replies.length; i++){
-                        if(replies[i]._id == inputId){
-                            commentWithReply = comment;
-                            replyIndex = i;
-                        }
-                    }
-                })
-                const commentToUpdate = await Place.commentsDb.findById(commentWithReply._id);
-                commentToUpdate.replies[replyIndex].reply = request.payload.reply;
+                const replyInfo = await Social.getCommentAndReplyIndex(inputId);
+                const returnedComment = replyInfo.comment;
+                const index = replyInfo.replyIndex;
+                const commentToUpdate = await Place.commentsDb.findById(returnedComment._id);
+                const input = request.payload.reply;
+                const sanitisedInput = sanitizeHtml(input);
+                if(sanitisedInput == ""){
+                    const message = "Your comment edit was blocked for security reasons";
+                    throw Boom.badData(message);
+                }   
+                commentToUpdate.replies[index].reply = sanitisedInput;
                 await commentToUpdate.save();  
                 commentForLoading = await Place.commentsDb.findById(commentToUpdate._id).lean();                         
             }           
@@ -269,11 +386,16 @@ const Social = {
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );          
+                comments: placeInfo.comments } );      
+            } catch (err) {
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });                  
+            }    
         }
     },
     deleteComment: {
         handler: async function(request, h) {
+            try{
             const userid = request.auth.credentials.id;
             const commentId = request.params.id;
             const comment = await Place.commentsDb.findById(commentId);
@@ -284,38 +406,57 @@ const Social = {
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );                      
+                comments: placeInfo.comments } );      
+            } catch (err) {
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });               
+            }                
         }
     },
     deleteReply: {
         handler: async function(request, h) {
+            try{
             const userid = request.auth.credentials.id;
             const replyId = request.params.id;
-            var commentWithReply = null;
-            var replyIndex = null;
-            const comments = await Place.commentsDb.find({});
-            comments.forEach(function(comment){
-                const replies = comment.replies;
-                for(let i = 0; i < replies.length; i++){
-                    if(replies[i]._id == replyId){
-                        commentWithReply = comment;
-                        replyIndex = i;
-                    }
-                }
-            })
-            commentWithReply.replies[replyIndex].remove();
-            await commentWithReply.save();
-            const place = await Place.placeDb.findById(commentWithReply.place).lean();
+            const replyInfo = await Social.getCommentAndReplyIndex(replyId);
+            const comment = replyInfo.comment;
+            const index = replyInfo.replyIndex;
+            comment.replies[index].remove();
+            await comment.save();
+            const place = await Place.placeDb.findById(comment.place).lean();
             const placeInfo = await Places.loadPlaceInfo(place._id,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );                      
+                comments: placeInfo.comments } ); 
+            }  catch (err) {
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });               
+            }                      
         }
     },
+    async getCommentAndReplyIndex(replyId) {
+        var returnedComment = null;
+        var replyIndex = null;
+        const comments = await Place.commentsDb.find({});
+        comments.forEach(function(comment){
+            const replies = comment.replies;
+            for(let i = 0; i < replies.length; i++){
+                if(replies[i]._id == replyId){
+                    returnedComment = comment;
+                    replyIndex = i;
+                }
+            }
+        })
+        return( { comment: returnedComment, replyIndex: replyIndex });
+    },
     getDateAndTime() {
-        const d = new Date();
+ //      const d = new Date(2021,4,18,0,0,0);
+      const d = new Date();
+        const d2 = d.toDateString();
+        const dayAndMonth = d2.substring(0, d2.length - 4);
+        const utc = d/1000;
         let date = d.getDate().toString();
         let month = (d.getMonth()+1).toString();
         let hours = d.getHours().toString();
@@ -338,7 +479,11 @@ const Social = {
         }
         const currentDateAndTime = date + "/" + month + "/" + d.getFullYear()
                                     + " " + hours + ":" + mins + ":" + secs;
-        return currentDateAndTime;
+        return { 
+            dateAndTime: currentDateAndTime,
+            utc: utc,
+            dayAndMonth: dayAndMonth
+        }
     }
 };
 

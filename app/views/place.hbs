@@ -1,10 +1,33 @@
 {{> mainmenu subtitle="Place details"}}
-<div class="uk-card uk-margin">
-    <img src="{{place.image}}" width="400"> <br>
-    <div class="uk-card uk-card-default uk-card-body uk-margin">
-        <h3>{{place.name}}</h3> 
-        <p>{{place.description}}</p>
+<div class="uk-card uk-margin uk-flex">
+    <div class="uk-width-auto">    
+    <img src="{{place.image}}" width="400">
+         <div class="uk-card uk-card-default uk-card-body uk-margin uk-padding-small">
+                        {{#if place.lat}}
+                        {{#if place.long}}   
+                        <div class="uk-flex">
+                        <div class="uk-width-auto uk-card">
+                        <font size="+5">{{place.temp}} °C </font>
+                        </div>
+                        <div class="uk-width-expand uk-text-right">
+                            <font size="-1">Feels Like: {{place.feelsLike}} °C  <br>
+                            {{place.clouds}} <br>
+                            Wind Speed: {{place.windSpeed}} m/s <br>
+                            Humidity: {{place.humidity}} % </font><br>
+                        </div>
+                        </div>
+                        {{/if}}
+                        {{/if}}         
+         </div>  
     </div>
+<div class="uk-width-auto">
+        <iframe src="/map/{{place._id}}" width="820" height="420"></iframe>
+</div>
+    </div>
+        <div class="uk-card uk-card-default uk-card-body uk-margin uk-width-expand">
+            <h3>{{place.name}}</h3> 
+            <p>{{place.description}}</p>
+        </div>
 <div class="uk-flex">
         <div class="uk-width-1-4 uk-card uk-card-default uk-card-body uk-margin uk-padding-small"
         style="height: 230px">

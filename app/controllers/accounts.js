@@ -4,6 +4,8 @@ const Joi = require('@hapi/joi');
 const Place = require('../models/place');
 const sanitizeHtml = require('sanitize-html');
 const ImageStore = require("../utils/image-store");
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 
 const Accounts = {
@@ -47,9 +49,15 @@ const Accounts = {
                 const message = "Email address is not registered";
                 throw Boom.unauthorized(message);
             }
-            user.comparePassword(password);
+            const isMatch = await bcrypt.compare(password, user.password);
+            if(isMatch){
             request.cookieAuth.set({ id: user.id });
             return h.redirect("/places");
+          }
+            if(!isMatch){
+              const message = "Incorrect Username or Password";
+            throw Boom.unauthorized(message);
+            }
         } catch(err) {
             return h.view("login", { errors: [{ message: err.message }] });
         }
@@ -92,6 +100,7 @@ const Accounts = {
                 }
                 const sanitisedName = sanitizeHtml(payload.name);
                 const sanitisedPassword = sanitizeHtml(payload.password);
+                const hash = await bcrypt.hash(sanitisedPassword, saltRounds);
                 if (sanitisedName == "" || sanitisedPassword == ""){
                   const message = "User Input blocked for security reasons"
                   throw Boom.badData(message);
@@ -99,7 +108,7 @@ const Accounts = {
                 const newUser = new User({
                     name: sanitisedName,
                     email: payload.email,
-                    password: sanitisedPassword
+                    password: hash
                 });
                 const user = await newUser.save();
                 request.cookieAuth.set({ id: user.id });
@@ -146,13 +155,14 @@ const Accounts = {
         try {
         const sanitisedName = sanitizeHtml(userUpdate.name);
         const sanitisedPassword = sanitizeHtml(userUpdate.password);
+        const hash = await bcrypt.hash(sanitisedPassword, saltRounds);
         if (sanitisedName == "" || sanitisedPassword == ""){
           const message = "User Input blocked for security reasons"
           throw Boom.badData(message);
         }
         user.name = sanitisedName;
         user.email = userUpdate.email;
-        user.password = sanitisedPassword;
+        user.password = hash;
         await user.save();
         const newUser = await User.findById(userid).lean();
         return h.view("settings", { user: newUser });

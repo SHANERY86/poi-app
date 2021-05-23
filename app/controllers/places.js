@@ -362,6 +362,12 @@ const Places = {
             return h.redirect("/category");
         }
     },
+    map: {
+        handler: async function (request, h) {
+            const place = await Place.placeDb.findById(request.params.id).lean();
+        return h.view("maptest", { place: place } );
+        }
+    },
     async loadPlaceInfo(placeId, loggedInUserId) {
         const place = await Place.placeDb.findById(placeId).lean();
         const user = await User.findById(loggedInUserId).lean();
