@@ -90,6 +90,18 @@ const commentsSchema = new Schema({
         dateAndTime: String,
     }]
 })
+
+const eventSchema = new Schema({
+    type: String,
+    dateAndTime: String,
+    utc: Number,
+    dayAndMonth: String,
+    content: String,
+    placename: String,
+    placeimg: String,
+    username: String,
+})
+
 placeSchema.statics.findAll = function() {
     return this.find({});
   }
@@ -110,17 +122,23 @@ commentsSchema.statics.findAll = function() {
     return this.find({});
 }
 
+eventSchema.statics.findAll = function() {
+    return this.find({});
+}
+
 
 const placeDb = Mongoose.model("Place", placeSchema);
 const categoryDb = Mongoose.model("Category", categorySchema); 
 const ratingDb = Mongoose.model("Rating", ratingSchema);
 const reviewDb = Mongoose.model("Review", reviewSchema);
 const commentsDb = Mongoose.model("Comments", commentsSchema);
+const eventDb = Mongoose.model("Event", eventSchema);
 
 module.exports = { 
             placeDb,
             categoryDb,
             ratingDb,
             reviewDb,
-            commentsDb
+            commentsDb,
+            eventDb
 };
