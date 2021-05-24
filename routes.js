@@ -55,7 +55,8 @@ module.exports = [
     { method: 'GET', path: '/noticeboard', config: NoticeBoard.viewNoticeBoard }, 
     { method: 'GET', path: '/map/{id}', config: Places.placeMap }, 
     { method: 'GET', path: '/map', config: Places.map },
-    { method: 'GET', path: '/mapview', config: Places.mapView },         
+    { method: 'GET', path: '/mapview', config: Places.mapView },
+    { method: 'GET', path: '/addgpsmap', config: Places.addGPSView },           
     {
         method: "GET",
         path: "/{param*}",

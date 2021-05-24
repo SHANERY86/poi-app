@@ -44,7 +44,7 @@ const Social = {
              const dateAndTime = Social.getDateAndTime();
              console.log(place.name);
              const event = new Place.eventDb({
-                 type: "rating",
+                 type: "gave a rating",
                  dateAndTime: dateAndTime.dateAndTime,
                  utc: dateAndTime.utc,
                  dayAndMonth: dateAndTime.dayAndMonth,
@@ -99,7 +99,7 @@ const Social = {
             })
             await review.save();
             const event = new Place.eventDb({
-                type: "review",
+                type: "submitted a review",
                 dateAndTime: currentDateAndTime.dateAndTime,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
                 utc: currentDateAndTime.utc,
@@ -202,7 +202,7 @@ const Social = {
             })
             await comment.save();
             const event = new Place.eventDb({
-                type: "comment",
+                type: "made a comment",
                 dateAndTime: currentDateAndTime.dateAndTime,
                 utc: currentDateAndTime.utc,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
@@ -294,7 +294,7 @@ const Social = {
             await comment.save();
             const place = await Place.placeDb.findById( comment.place ).lean();
             const event = new Place.eventDb({
-                type: "reply",
+                type: "replied",
                 dateAndTime: dateAndTime.dateAndTime,
                 utc: dateAndTime.utc,
                 dayAndMonth: dateAndTime.dayAndMonth,
@@ -330,7 +330,7 @@ const Social = {
                 await commentToUpdate.save();
                 const place = await Place.placeDb.findById(commentToUpdate.place).lean();                
                 const event = new Place.eventDb({
-                    type: "reply",
+                    type: "replied",
                     dateAndTime: dateAndTime.dateAndTime,
                     utc: dateAndTime.utc,
                     dayAndMonth: dateAndTime.dayAndMonth,
