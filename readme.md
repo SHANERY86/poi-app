@@ -10,16 +10,11 @@ This app allows a users to log places in the world that they are interested in, 
 ### Creating Places of Interest
 Create a Place of Interest(POI) entry by clicking the add place icon, filling in the fields, finding your place roughly on the map and uploading a suitable photo. 
 
-### Viewing POIs by Category/Creating a category
-The POIs may be filtered by a certain category. This app allows the user to create their own list of categories, and list their POIs in each appropriate category. 
-To create a category, select the "View by Category" option in your Places List. In this view, you will have the option to create a category. When you have created a category,
-go back to your Place List and click the pen icon on a POI, this view allows you to edit this POI, and also set a new category. 
+### Social Features
+See POIs that other users and have interacted with by using the Social Map, Social List and Notice Board. Click into each POI, and see more information about them. Go and visit them, and then leave your opinion by submitting you own rating and review. Have a discussion in the comments section.
 
 ### Weather Report
 When you have set accurate GPS co-ordinates for a POI, you will recieve a weather report at the bottom of the POI. GPS co-ordinates can be optionally input when creating a POI or added later in the edit POI menu.
-
-### Social Features
-See POIs that other users and have interacted with by using the Social Map, Social List and Notice Board. Click into each POI, and see more information about them. Go and visit them, and then leave your opinion by submitting you own rating and review. Have a discussion in the comments section.
 
 ## Admin functionality
 The admin dashboard can be accessed by entering '/admin' at the end of the app url in the browser. The admin password is pre-programmed into the password field for demo purposes.
