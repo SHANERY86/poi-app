@@ -42,14 +42,18 @@ const Social = {
              placeObj.rating = Math.round(ratingsAvg * 10)/10;
              await placeObj.save();
              const dateAndTime = Social.getDateAndTime();
+             console.log(place.name);
              const event = new Place.eventDb({
-                 type: "rating",
+                 type: "gave a rating",
                  dateAndTime: dateAndTime.dateAndTime,
                  utc: dateAndTime.utc,
                  dayAndMonth: dateAndTime.dayAndMonth,
                  content: request.payload.rating.toString() + " out of 5.0",
-                 placename: place.name,
-                 placeimg: place.image,
+                 place: {
+                     id: placeId,
+                     name: place.name,
+                     image: place.image,
+                 },
                  username: user.name
              })
              event.save();
@@ -95,13 +99,16 @@ const Social = {
             })
             await review.save();
             const event = new Place.eventDb({
-                type: "review",
+                type: "submitted a review",
                 dateAndTime: currentDateAndTime.dateAndTime,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
                 utc: currentDateAndTime.utc,
                 content: sanitizedReview,
-                placename: place.name,
-                placeimg: place.image,
+                place: {
+                    id: placeId,
+                    name: place.name,
+                    image: place.image,
+                },
                 username: user.name
             })
             event.save();
@@ -195,13 +202,16 @@ const Social = {
             })
             await comment.save();
             const event = new Place.eventDb({
-                type: "comment",
+                type: "made a comment",
                 dateAndTime: currentDateAndTime.dateAndTime,
                 utc: currentDateAndTime.utc,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
                 content: sanitisedInput,
-                placename: place.name,
-                placeimg: place.image,
+                place: {
+                    id: placeId,
+                    name: place.name,
+                    image: place.image,
+                },
                 username: user.name
             })
             event.save();
@@ -284,13 +294,16 @@ const Social = {
             await comment.save();
             const place = await Place.placeDb.findById( comment.place ).lean();
             const event = new Place.eventDb({
-                type: "reply",
+                type: "replied",
                 dateAndTime: dateAndTime.dateAndTime,
                 utc: dateAndTime.utc,
                 dayAndMonth: dateAndTime.dayAndMonth,
                 content: sanitisedInput,
-                placename: place.name,
-                placeimg: place.image,
+                place: {
+                    id: place._id,
+                    name: place.name,
+                    image: place.image,
+                },
                 username: user.name
             })
             await event.save();
@@ -317,13 +330,16 @@ const Social = {
                 await commentToUpdate.save();
                 const place = await Place.placeDb.findById(commentToUpdate.place).lean();                
                 const event = new Place.eventDb({
-                    type: "reply",
+                    type: "replied",
                     dateAndTime: dateAndTime.dateAndTime,
                     utc: dateAndTime.utc,
                     dayAndMonth: dateAndTime.dayAndMonth,
                     content: sanitisedInput,
-                    placename: place.name,
-                    placeimg: place.image,
+                    place: {
+                        id: place._id,
+                        name: place.name,
+                        image: place.image,
+                    },
                     username: user.name
                 })
                 await event.save();
@@ -452,7 +468,7 @@ const Social = {
         return( { comment: returnedComment, replyIndex: replyIndex });
     },
     getDateAndTime() {
- //      const d = new Date(2021,4,18,0,0,0);
+//      const d = new Date(2021,4,23,0,0,0);
       const d = new Date();
         const d2 = d.toDateString();
         const dayAndMonth = d2.substring(0, d2.length - 4);

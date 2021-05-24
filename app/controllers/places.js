@@ -4,6 +4,7 @@ const ImageStore = require("../utils/image-store");
 const Weather = require("../utils/weather");
 const Joi = require('@hapi/joi');
 const Boom = require('@hapi/boom');
+const Social = require("./social");
 const sanitizeHtml = require('sanitize-html');
 
 
@@ -90,6 +91,21 @@ const Places = {
             newPlace.username = user.name;
             newPlace.useremail = user.email;
             await newPlace.save();
+            const dateAndTime = Social.getDateAndTime();
+            const event = new Place.eventDb({
+                type: "added a New Place",
+                dateAndTime: dateAndTime.dateAndTime,
+                utc: dateAndTime.utc,
+                dayAndMonth: dateAndTime.dayAndMonth,
+                content: newPlace.description,
+                place: {
+                    id: newPlace._id,
+                    name: newPlace.name,
+                    image: newPlace.image,
+                },
+                username: user.name
+            })
+            event.save();         
             return h.redirect("/places");
         } catch(err) {
             return h.view("addplaces", { errors: [{ message: err.message }] });
@@ -108,19 +124,7 @@ const Places = {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
             const userPlaces = await Place.placeDb.find({ user: user._id }); 
-            userPlaces.forEach(async function(place) {
-                if(place.lat && place.long){
-                let placeId = place._id;
-                let placeData = await Place.placeDb.findById(placeId);
-                let weatherReport = await Weather.getWeather(place.lat,place.long);
-                placeData.temp = weatherReport.temp;
-                placeData.feelsLike = weatherReport.feelsLike;
-                placeData.clouds = weatherReport.clouds;
-                placeData.windSpeed = weatherReport.windSpeed;
-                placeData.humidity = weatherReport.humidity; 
-                await placeData.save();
-                }
-            })   
+            await Places.updateWeatherInfo(userPlaces);
             const places = await Place.placeDb.find({ user: user._id }).lean();       
             return h.view("places", { places: places });           
         }
@@ -128,19 +132,7 @@ const Places = {
     socialPlaces: {
         handler: async function (request, h) {
             let places = await Place.placeDb.find( { } );
-            places.forEach(async function(place) {
-                if(place.lat && place.long){
-                let placeId = place._id;
-                let placeData = await Place.placeDb.findById(placeId);
-                let weatherReport = await Weather.getWeather(place.lat,place.long);
-                placeData.temp = weatherReport.temp;
-                placeData.feelsLike = weatherReport.feelsLike;
-                placeData.clouds = weatherReport.clouds;
-                placeData.windSpeed = weatherReport.windSpeed;
-                placeData.humidity = weatherReport.humidity; 
-                await placeData.save();
-                }
-            })
+            await Places.updateWeatherInfo(places);
             places = await Place.placeDb.find({ }).lean(); 
             return h.view("socialplaces", { places: places, });                       
     }
@@ -240,7 +232,6 @@ const Places = {
             const newCategory = await Place.categoryDb.find( { name: newData.category, user: userid });
             if (newData.category != "None"){
             place.category = newCategory[0]._id;
-
             }
             place.lat = newData.latitude;
             place.long = newData.longitude;
@@ -300,9 +291,9 @@ const Places = {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
             const imageId = await ImageStore.getImageId(place.image);
-            if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+/*            if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
                 await ImageStore.deleteImage(imageId);
-        }
+        } */
             await place.remove();
             return h.redirect("/places");
         }
@@ -362,11 +353,29 @@ const Places = {
             return h.redirect("/category");
         }
     },
-    map: {
+    placeMap: {
         handler: async function (request, h) {
             const place = await Place.placeDb.findById(request.params.id).lean();
-        return h.view("maptest", { place: place } );
+        return h.view("placemap", { place: place } );
         }
+    },
+    map: {
+        handler: async function (request, h) {
+            let places = await Place.placeDb.findAll();
+            await Places.updateWeatherInfo(places);
+            places = await Place.placeDb.find({ }).lean(); 
+            return h.view("allmap", { places: places }); 
+        }
+    },
+    mapView: {
+        handler: async function (request, h) {
+            return h.view("placesmap");        
+        }
+    },
+    addGPSView: {
+        handler: async function (request, h) {
+            return h.view("addgpsmap");        
+        }        
     },
     async loadPlaceInfo(placeId, loggedInUserId) {
         const place = await Place.placeDb.findById(placeId).lean();
@@ -380,7 +389,22 @@ const Places = {
             comments: placeComments
         }
         return placeInfo;
+    },
+    async updateWeatherInfo(places){
+        for (const place of places){
+            if(place.lat && place.long){
+                let placeId = place._id;
+                let placeData = await Place.placeDb.findById(placeId);
+                let weatherReport = await Weather.getWeather(place.lat,place.long);
+                placeData.temp = weatherReport.temp;
+                placeData.feelsLike = weatherReport.feelsLike;
+                placeData.clouds = weatherReport.clouds;
+                placeData.windSpeed = weatherReport.windSpeed;
+                placeData.humidity = weatherReport.humidity; 
+                await placeData.save();
+        }
     }
+}
 };
 
 module.exports = Places 
