@@ -52,7 +52,7 @@ const Accounts = {
             const isMatch = await bcrypt.compare(password, user.password);
             if(isMatch){
             request.cookieAuth.set({ id: user.id });
-            return h.redirect("/places");
+            return h.redirect("/mapview");
           }
             if(!isMatch){
               const message = "Incorrect Username or Password";
