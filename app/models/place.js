@@ -97,8 +97,14 @@ const eventSchema = new Schema({
     utc: Number,
     dayAndMonth: String,
     content: String,
-    placename: String,
-    placeimg: String,
+    place: {
+        id: { 
+            type: Schema.Types.ObjectId,
+            ref: "Place"
+        },
+        name: String,
+        image: String,
+    },
     username: String,
 })
 

@@ -53,7 +53,9 @@ module.exports = [
     { method: 'POST', path: '/adminlogin', config: Accounts.adminLogin },
     { method: 'GET', path: '/adminview', config: Accounts.adminView },       
     { method: 'GET', path: '/noticeboard', config: NoticeBoard.viewNoticeBoard }, 
-    { method: 'GET', path: '/map/{id}', config: Places.map },       
+    { method: 'GET', path: '/map/{id}', config: Places.placeMap }, 
+    { method: 'GET', path: '/map', config: Places.map },
+    { method: 'GET', path: '/mapview', config: Places.mapView },         
     {
         method: "GET",
         path: "/{param*}",

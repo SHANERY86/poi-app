@@ -362,10 +362,21 @@ const Places = {
             return h.redirect("/category");
         }
     },
-    map: {
+    placeMap: {
         handler: async function (request, h) {
             const place = await Place.placeDb.findById(request.params.id).lean();
-        return h.view("maptest", { place: place } );
+        return h.view("placemap", { place: place } );
+        }
+    },
+    map: {
+        handler: async function (request, h) {
+            const places = await Place.placeDb.findAll().lean();
+            return h.view("allmap", { places: places }); 
+        }
+    },
+    mapView: {
+        handler: async function (request, h) {
+            return h.view("placesmap");        
         }
     },
     async loadPlaceInfo(placeId, loggedInUserId) {
