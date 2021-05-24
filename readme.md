@@ -1,14 +1,14 @@
-# Places of Interest App v1.5
+# Places of Interest App v1.6
 
 ## Description
-This app allows a user to set up an account and store information about places in the world that they are interested in. This is an assigment required for the completion of the Enterprise Web Development module in the HDip in Computer Science 2020 course at Waterford Institute of Technology.
+This app allows a users to log places in the world that they are interested in, and share these places with other people around the world. The users can interact through comments and reviews to share their experiences. This is an assigment required for the completion of the Enterprise Web Development module in the HDip in Computer Science 2020 course at Waterford Institute of Technology.
 
 <br />
 
 ## Instructions
 
 ### Creating Places of Interest
-Create a Place of Interest(POI) entry by clicking the add place icon, filling in the fields and uploading a suitable photo. 
+Create a Place of Interest(POI) entry by clicking the add place icon, filling in the fields, finding your place roughly on the map and uploading a suitable photo. 
 
 ### Viewing POIs by Category/Creating a category
 The POIs may be filtered by a certain category. This app allows the user to create their own list of categories, and list their POIs in each appropriate category. 
@@ -19,8 +19,7 @@ go back to your Place List and click the pen icon on a POI, this view allows you
 When you have set accurate GPS co-ordinates for a POI, you will recieve a weather report at the bottom of the POI. GPS co-ordinates can be optionally input when creating a POI or added later in the edit POI menu.
 
 ### Social Features
-See POIs that other users have submitted using the POI Social link. Click into each POI, and see more information about them. Go and visit them, and then leave your opinion 
-by submitting you own rating and review. Have a discussion in the comments section.
+See POIs that other users and have interacted with by using the Social Map, Social List and Notice Board. Click into each POI, and see more information about them. Go and visit them, and then leave your opinion by submitting you own rating and review. Have a discussion in the comments section.
 
 ## Admin functionality
 The admin dashboard can be accessed by entering '/admin' at the end of the app url in the browser. The admin password is pre-programmed into the password field for demo purposes.
@@ -87,9 +86,12 @@ apiKey=your-api-key
 * Rating and Review
 * Comments
 
+### v1.6
+* Map features
+* Notice Board
+
 ## Roadmap
-* Social features (View other peoples POIs, commenting, rating)
-* Embedded map applet
+* To Be Continued...
 
 ## Author
 Shane Ryan <br />
