@@ -1,5 +1,5 @@
 const axios = require('axios');
-/*const dotenv = require('dotenv');
+const dotenv = require('dotenv');
 
 const result = dotenv.config();
 if (result.error) {
@@ -7,7 +7,7 @@ if (result.error) {
   process.exit(1);
 }
 const apiKey = process.env.apiKey;
-*/
+
 const Weather = {
 
     getWeather: async function(lat,long) {

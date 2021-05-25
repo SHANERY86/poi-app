@@ -27,6 +27,8 @@ const Social = {
             if(existingRating[0]){
                 existingRating[0].rating = ratingInput;
                 await existingRating[0].save();
+                const ratingEvent = await Place.eventDb.find( { type:"gave a rating", username: user.name, "place.id": place._id } );
+                ratingEvent[0].remove();
             }
              const placeRatings = await Place.ratingDb.find( { place: placeId } );
              let ratingstotal = 0;
@@ -42,7 +44,6 @@ const Social = {
              placeObj.rating = Math.round(ratingsAvg * 10)/10;
              await placeObj.save();
              const dateAndTime = Social.getDateAndTime();
-             console.log(place.name);
              const event = new Place.eventDb({
                  type: "gave a rating",
                  dateAndTime: dateAndTime.dateAndTime,
@@ -57,12 +58,12 @@ const Social = {
                  username: user.name
              })
              event.save();
-             const placeInfo = await Places.loadPlaceInfo(placeId,user._id);
+             const placeInfo = await Social.loadPlaceInfo(placeId,user._id);
              return h.view("place", { 
                  place: placeInfo.place, 
                  reviews: placeInfo.reviews, 
                  user: placeInfo.loggedInUser, 
-                 comments: placeInfo.comments } );   
+                 comments: placeInfo.comments, social:true } );   
              }
              catch (err) {
                 return h.view("errorpage", { errors: [{ message: err.message }] });                
@@ -100,6 +101,7 @@ const Social = {
             await review.save();
             const event = new Place.eventDb({
                 type: "submitted a review",
+                refid: review._id,
                 dateAndTime: currentDateAndTime.dateAndTime,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
                 utc: currentDateAndTime.utc,
@@ -112,12 +114,12 @@ const Social = {
                 username: user.name
             })
             event.save();
-            const placeInfo = await Places.loadPlaceInfo(placeId,user._id);
+            const placeInfo = await Social.loadPlaceInfo(placeId,user._id);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );      
+                comments: placeInfo.comments, social:true } );      
             }
             catch (err) {
                 return h.view("errorpage", {
@@ -135,6 +137,7 @@ const Social = {
     editReview: {
         handler: async function(request, h) {
             const userid = request.auth.credentials.id;
+            const user = User.findById(userid);
             const reviewId = request.params.id;
             try{
             const review = await Place.reviewDb.findById( { _id: reviewId });
@@ -144,15 +147,34 @@ const Social = {
                 const message = "Your review has been blocked for security reasons";
                 throw Boom.badData(message);
             } 
-            review.review = sanitisedEdit;
+            review.review = sanitisedEdit + " (edited)";
+            const oldEvent = await Place.eventDb.find( { refid: review._id } );
+            oldEvent[0].remove();
             const placeId = review.place;
+            const place = await Place.placeDb.findById(placeId);
+            const currentDateAndTime = Social.getDateAndTime();
+            const event = new Place.eventDb({
+                type: "edited a review",
+                refid: review._id,
+                dateAndTime: currentDateAndTime.dateAndTime,
+                dayAndMonth: currentDateAndTime.dayAndMonth,
+                utc: currentDateAndTime.utc,
+                content: sanitisedEdit,
+                place: {
+                    id: placeId,
+                    name: place.name,
+                    image: place.image,
+                },
+                username: user.name                
+            })
+            event.save();
             await review.save();
-            const placeInfo = await Places.loadPlaceInfo(placeId,userid);           
+            const placeInfo = await Social.loadPlaceInfo(placeId,userid);           
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );      
+                comments: placeInfo.comments, social:true } );      
             }
             catch (err) {
                 return h.view("errorpage", {
@@ -166,13 +188,15 @@ const Social = {
             const userid = request.auth.credentials.id;            
             const review = await Place.reviewDb.findById( { _id: request.params.id } );
             const placeId = review.place;
+            const reviewEvent = await Place.eventDb.find( { refid: review._id } );
+            reviewEvent[0].remove();
             review.remove();
-            const placeInfo = await Places.loadPlaceInfo(placeId,userid);
+            const placeInfo = await Social.loadPlaceInfo(placeId,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );        
+                comments: placeInfo.comments, social:true } );        
             }
             catch (err) {
                 return h.view("errorpage", {
@@ -203,6 +227,7 @@ const Social = {
             await comment.save();
             const event = new Place.eventDb({
                 type: "made a comment",
+                refid: comment._id,
                 dateAndTime: currentDateAndTime.dateAndTime,
                 utc: currentDateAndTime.utc,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
@@ -215,12 +240,12 @@ const Social = {
                 username: user.name
             })
             event.save();
-            const placeInfo = await Places.loadPlaceInfo(placeId,user._id);
+            const placeInfo = await Social.loadPlaceInfo(placeId,user._id);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );        
+                comments: placeInfo.comments, social:true } );        
             }
             catch(err){
                 return h.view("errorpage", {
@@ -290,11 +315,14 @@ const Social = {
                 reply: sanitisedInput,
                 dateAndTime: dateAndTime.dateAndTime
             }
-            comment.replies.push(reply);
+            var replies = comment.replies;
+            replies.push(reply);
+            const replyid = replies[replies.length - 1]._id;
             await comment.save();
             const place = await Place.placeDb.findById( comment.place ).lean();
             const event = new Place.eventDb({
                 type: "replied",
+                refid: replyid,
                 dateAndTime: dateAndTime.dateAndTime,
                 utc: dateAndTime.utc,
                 dayAndMonth: dateAndTime.dayAndMonth,
@@ -327,10 +355,13 @@ const Social = {
                     dateAndTime: dateAndTime.dateAndTime
                 }
                 commentToUpdate.replies.push(reply);
-                await commentToUpdate.save();
-                const place = await Place.placeDb.findById(commentToUpdate.place).lean();                
+                await commentToUpdate.save(); 
+                const replies = commentToUpdate.replies; 
+                const replyid = replies[replies.length - 1]._id;
+                const place = await Place.placeDb.findById( commentToUpdate.place ).lean();
                 const event = new Place.eventDb({
                     type: "replied",
+                    refid: replyid,
                     dateAndTime: dateAndTime.dateAndTime,
                     utc: dateAndTime.utc,
                     dayAndMonth: dateAndTime.dayAndMonth,
@@ -342,15 +373,15 @@ const Social = {
                     },
                     username: user.name
                 })
-                await event.save();
+                await event.save();            
                 commentForLoading = commentToUpdate;
             }
-            const placeInfo = await Places.loadPlaceInfo(commentForLoading.place,user._id);
+            const placeInfo = await Social.loadPlaceInfo(commentForLoading.place,user._id);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );        
+                comments: placeInfo.comments, social:true } );        
         } catch (err) {
             return h.view("errorpage", {
                 errors: [{ message: err.message }] });          
@@ -368,6 +399,7 @@ const Social = {
         handler: async function(request, h) {
             try{
             const userid = request.auth.credentials.id;
+            const user = await User.findById(userid);
             const inputId = request.params.id;
             var commentForLoading = null;
             const comment = await Place.commentsDb.findById(inputId);
@@ -380,6 +412,25 @@ const Social = {
             }             
             comment.comment = sanitisedInput;
             await comment.save();
+            const oldEvent = await Place.eventDb.find( { refid: comment._id } );
+            oldEvent[0].remove();
+            const currentDateAndTime = Social.getDateAndTime();
+            const place = await Place.placeDb.findById(comment.place);
+            const event = new Place.eventDb({
+                type: "edited a comment",
+                refid: comment._id,
+                dateAndTime: currentDateAndTime.dateAndTime,
+                dayAndMonth: currentDateAndTime.dayAndMonth,
+                utc: currentDateAndTime.utc,
+                content: sanitisedInput,
+                place: {
+                    id: comment.place,
+                    name: place.name,
+                    image: place.image,
+                },
+                username: user.name                
+            })
+            event.save();
             commentForLoading = await Place.commentsDb.findById(comment._id).lean();
             } 
             if(!comment){
@@ -394,15 +445,35 @@ const Social = {
                     throw Boom.badData(message);
                 }   
                 commentToUpdate.replies[index].reply = sanitisedInput;
-                await commentToUpdate.save();  
+                await commentToUpdate.save();
+                const replyId = returnedComment.replies[index]._id;
+                const place = await Place.placeDb.findById(returnedComment.place);
+                const oldEvent = await Place.eventDb.find( { refid: replyId } );
+                const currentDateAndTime = Social.getDateAndTime();
+                oldEvent[0].remove();
+                const event = new Place.eventDb({
+                    type: "replied",
+                    refid: replyId,
+                    dateAndTime: currentDateAndTime.dateAndTime,
+                    dayAndMonth: currentDateAndTime.dayAndMonth,
+                    utc: currentDateAndTime.utc,
+                    content: sanitisedInput,
+                    place: {
+                        id: returnedComment.place,
+                        name: place.name,
+                        image: place.image,
+                    },
+                    username: user.name                
+                })
+                event.save();                
                 commentForLoading = await Place.commentsDb.findById(commentToUpdate._id).lean();                         
             }           
-            const placeInfo = await Places.loadPlaceInfo(commentForLoading.place,userid);
+            const placeInfo = await Social.loadPlaceInfo(commentForLoading.place,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );      
+                comments: placeInfo.comments, social:true } );      
             } catch (err) {
                 return h.view("errorpage", {
                     errors: [{ message: err.message }] });                  
@@ -416,13 +487,15 @@ const Social = {
             const commentId = request.params.id;
             const comment = await Place.commentsDb.findById(commentId);
             const place = await Place.placeDb.findById(comment.place).lean();
+            const event = await Place.eventDb.find( { refid: comment._id } );
             await comment.remove();
-            const placeInfo = await Places.loadPlaceInfo(place._id,userid);
+            await event[0].remove();
+            const placeInfo = await Social.loadPlaceInfo(place._id,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } );      
+                comments: placeInfo.comments, social:true } );      
             } catch (err) {
                 return h.view("errorpage", {
                     errors: [{ message: err.message }] });               
@@ -440,17 +513,30 @@ const Social = {
             comment.replies[index].remove();
             await comment.save();
             const place = await Place.placeDb.findById(comment.place).lean();
-            const placeInfo = await Places.loadPlaceInfo(place._id,userid);
+            const placeInfo = await Social.loadPlaceInfo(place._id,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments } ); 
+                comments: placeInfo.comments, social:true } ); 
             }  catch (err) {
                 return h.view("errorpage", {
                     errors: [{ message: err.message }] });               
             }                      
         }
+    },
+    async loadPlaceInfo(placeId, loggedInUserId) {
+        const place = await Place.placeDb.findById(placeId).lean();
+        const user = await User.findById(loggedInUserId).lean();
+        const placeReviews = await Place.reviewDb.find( { place: place }).lean();
+        const placeComments = await Place.commentsDb.find( { place: place }).lean();
+        const placeInfo = {
+            place: place,
+            loggedInUser: user,
+            reviews: placeReviews,
+            comments: placeComments
+        }
+        return placeInfo;
     },
     async getCommentAndReplyIndex(replyId) {
         var returnedComment = null;
