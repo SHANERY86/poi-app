@@ -93,9 +93,14 @@ const Accounts = {
         handler: async function(request, h) {
             const payload = request.payload;
             let email = await User.findByEmail(payload.email);
+            let username = await User.find( { name: payload.name } );
             try {
                 if(email){
                     const message = "Email address is already on the system"
+                    throw Boom.badData(message);
+                }
+                if(username[0]){
+                    const message = "Username is already taken"
                     throw Boom.badData(message);
                 }
                 const sanitisedName = sanitizeHtml(payload.name);

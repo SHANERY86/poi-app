@@ -8,12 +8,21 @@
                 <textarea class="uk-textarea" rows="5" type="text" name="description" placeholder="Description"></textarea>
             </div>
                     <div class="uk-margin">
-                  <label>Enter Category (create categories from "view by category menu")</label>
+                  <label>Select Category (create categories from "view by category menu")</label>
                     <select class="uk-select" type="text" name="category">
                         <option>None</option>
-                        {{#each categories}}
-                        <option>{{name}}</option>
-                        {{/each}}                                            
+                        <option>City</option>
+                        <option>Town</option>
+                        <option>Landmark - Man made</option>
+                        <option>Landmark - Natural</option>
+                        <option>Mountain</option>
+                        <option>Hill</option>
+                        <option>Beach</option>
+                        <option>Lake</option>
+                        <option>River</option>
+                        <option>Island</option>
+                        <option>Establishment</option> 
+                        <option>Other</option>                                         
                     </select>  
         </div>
              <div class="uk-flex">
@@ -36,7 +45,7 @@
                             <button type="button" onclick="getGPS();" class="uk-button uk-button-default uk-button-small">OK</button>
                             </div>                        
                 </div>
-                <iframe id="iframe"  src="/addgpsmap" width="650", height="350"></iframe>
+                <iframe id="iframe" src="/addgpsmap" width="650", height="350"></iframe>
             </div>
         </div>
              </div> 

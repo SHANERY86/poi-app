@@ -2,12 +2,41 @@
 
 const Place = require("../models/place");
 const Social = require("../controllers/social");
+const User = require("../models/user");
+
 
 const NoticeBoard = {
     viewNoticeBoard: {
-        auth: false,
         handler: async function(request, h) {
-            const events = await Place.eventDb.find({}).lean();
+            try{
+            const userid = request.auth.credentials.id;
+            const user = await User.findById(userid);
+            const loggedInUsername = user.name;
+            const socialPlaces = await Place.placeDb.find({ social : true });
+            const socialPlaceIds = [];
+            for (const place of socialPlaces){
+                socialPlaceIds.push(place._id)
+            } 
+            const events = await Place.eventDb.find({ 
+                "place.id": { $in: socialPlaceIds }, 
+                type: { $nin: "replied" }, 
+                username: { $nin: loggedInUsername } 
+            }).lean();
+            const replyEvents = await Place.eventDb.find( { type: "replied" } );
+            const replyEventsForYou_ids = [];
+            for (const replyEvent of replyEvents){
+                const replyId = replyEvent.refid.toString();
+                const replyInfo = await Social.getCommentAndReplyIndex(replyId);
+                const comment = replyInfo.comment;
+                const replyIndex = replyInfo.replyIndex;
+                if(comment.replies[replyIndex].userId != userid && comment.userId == userid){
+                    replyEventsForYou_ids.push(replyId);
+            }
+            }
+            const replyEventsForYou = await Place.eventDb.find({ refid: { $in: replyEventsForYou_ids } } ).lean();
+            for (const replyEvent of replyEventsForYou){
+                events.push(replyEvent);
+            }
             const currentDateAndTime = Social.getDateAndTime();
             const currentDate = currentDateAndTime.dateAndTime.substr(0,2);
             const today = new Date()
@@ -53,12 +82,21 @@ const NoticeBoard = {
             }
             laterEvents.push(entry);
             }
+            if(justNowEvents.length == 0 && todaysEvents.length == 0 && yesterdaysEvents == 0 && laterEvents == 0){
+                return h.view("noticeboard", { empty: true } );
+            }
             return(h.view("noticeboard", { 
                 justnow: justNowEvents, 
                 today: todaysEvents, 
                 yesterday: yesterdaysEvents, 
                 later: laterEvents
                 }));
+            }
+            catch(err) {
+                return h.view("errorpage", {
+                    errors: [{ message: err.message }] });          
+            }
+                
         }
     }
 }

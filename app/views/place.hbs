@@ -28,6 +28,7 @@
             <h3>{{place.name}}</h3> 
             <p>{{place.description}}</p>
         </div>
+        {{#if social}}
 <div class="uk-flex">
         <div class="uk-width-1-4 uk-card uk-card-default uk-card-body uk-margin uk-padding-small"
         style="height: 230px">
@@ -163,7 +164,8 @@
         {{/each}}
         {{/if}}
         {{#unless comments}}
-        <h3>No comments yet</h3>
+        <div class="uk-card uk-text-center">No comments yet</div>
         {{/unless}}
 </div>
+    {{/if}}
 </div>
