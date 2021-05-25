@@ -5,10 +5,7 @@ const placeSchema = new Schema({
     name: String,
     description: String,
     image: String,
-    category: {
-        type: Schema.Types.ObjectId,
-        ref: "Category"
-    },
+    category: String,
     lat: Number,
     long: Number,
     temp: Number,
@@ -27,6 +24,7 @@ const placeSchema = new Schema({
         type: Number,
         default: 0
     },
+    social: Schema.Types.Boolean
 },
 { versionKey: false });
 
@@ -93,6 +91,7 @@ const commentsSchema = new Schema({
 
 const eventSchema = new Schema({
     type: String,
+    refid: String,
     dateAndTime: String,
     utc: Number,
     dayAndMonth: String,

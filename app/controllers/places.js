@@ -54,7 +54,7 @@ const Places = {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
             const data = request.payload;
-            const category = await Place.categoryDb.find({ name: data.category, user: user._id });
+ //           const category = await Place.categoryDb.find({ name: data.category, user: user._id });
             const imageFile = request.payload.imagefile;
             if (Object.keys(imageFile).length > 0) {
             imageUrl = await ImageStore.uploadImage(imageFile);
@@ -72,14 +72,15 @@ const Places = {
                 name: sanitisedName,
                 description: sanitisedDescription,
                 user: user._id,
-                image: imageUrl
+                image: imageUrl,
+                category: data.category,
+                social: false
             });
-            if( data.category != "None"){
+/*            if( data.category != "None"){
                 newPlace.category = category[0]._id;
-            }
+            } */
             if(data.latitude && data.longitude){
                 weatherReport = await Weather.getWeather(data.latitude,data.longitude);
-                console.log(weatherReport);
                 newPlace.lat = data.latitude;
                 newPlace.long = data.longitude;
                 newPlace.temp = weatherReport.temp;
@@ -90,22 +91,7 @@ const Places = {
             }
             newPlace.username = user.name;
             newPlace.useremail = user.email;
-            await newPlace.save();
-            const dateAndTime = Social.getDateAndTime();
-            const event = new Place.eventDb({
-                type: "added a New Place",
-                dateAndTime: dateAndTime.dateAndTime,
-                utc: dateAndTime.utc,
-                dayAndMonth: dateAndTime.dayAndMonth,
-                content: newPlace.description,
-                place: {
-                    id: newPlace._id,
-                    name: newPlace.name,
-                    image: newPlace.image,
-                },
-                username: user.name
-            })
-            event.save();         
+            await newPlace.save();      
             return h.redirect("/places");
         } catch(err) {
             return h.view("addplaces", { errors: [{ message: err.message }] });
@@ -131,12 +117,19 @@ const Places = {
     },
     socialPlaces: {
         handler: async function (request, h) {
-            let places = await Place.placeDb.find( { } );
+            let places = await Place.placeDb.find( { social: true } );
             await Places.updateWeatherInfo(places);
-            places = await Place.placeDb.find({ }).lean(); 
+            places = await Place.placeDb.find({ social: true }).lean(); 
             return h.view("socialplaces", { places: places, });                       
     }
 },
+    socialPlacesByCategory: {
+        handler: async function (request, h) {
+            const category = request.params.cat;
+            const places = await Place.placeDb.find({ category: category }).lean();
+            return h.view("socialplaces", { places: places });
+        }        
+    },
     onePlace: {
         handler: async function (request, h) {
             const placeId = request.params.id;
@@ -145,6 +138,52 @@ const Places = {
             const user = await User.findById(request.auth.credentials.id).lean();    
             const placeComments = await Place.commentsDb.find( { place: place } ).lean();  
             return h.view("place", { place: place, reviews: placeReviews, user: user, comments: placeComments });
+        }
+    },
+    onePlaceSocial: {
+        handler: async function (request, h) {
+            const placeId = request.params.id;
+            const place = await Place.placeDb.findById(placeId).lean();
+            const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();
+            const user = await User.findById(request.auth.credentials.id).lean();    
+            const placeComments = await Place.commentsDb.find( { place: place } ).lean();  
+            return h.view("place", { place: place, reviews: placeReviews, user: user, comments: placeComments, social:true });
+        }       
+    },
+    sharePlace: {
+        handler: async function (request, h) {
+            const user = await User.findById(request.auth.credentials.id);
+            const placeId = request.params.id;
+            const place = await Place.placeDb.findById(placeId);
+            place.social = true;
+            place.save();
+            const dateAndTime = Social.getDateAndTime();
+            const event = new Place.eventDb({
+                type: "shared a Place",
+                dateAndTime: dateAndTime.dateAndTime,
+                utc: dateAndTime.utc,
+                dayAndMonth: dateAndTime.dayAndMonth,
+                content: place.description,
+                place: {
+                    id: place._id,
+                    name: place.name,
+                    image: place.image,
+                },
+                username: user.name
+            })
+            event.save();   
+            return h.redirect("/places");
+        }
+    },
+    makePrivate: {
+        handler: async function (request, h) {
+            const placeId = request.params.id;
+            const place = await Place.placeDb.findById(placeId);
+            place.social = false;
+            place.save();
+            const shareEvent = await Place.eventDb.find( { type:"shared a Place", "place.id": placeId } );
+            shareEvent[0].remove();
+            return h.redirect("/places");
         }
     },
     //displays the POI list for a user as a logged in admin
@@ -159,9 +198,8 @@ const Places = {
     //displays list of POIs with category filter
     placesByCategory: {
         handler: async function (request, h) {
-            const categoryId = request.params._id; 
-
-            const placesInCategory = await Place.placeDb.find({ category: categoryId }).lean();
+            const category = request.params.cat; 
+            const placesInCategory = await Place.placeDb.find( { category: category } ).lean();
             return h.view("places", { places: placesInCategory });          
         }
     },
@@ -229,10 +267,11 @@ const Places = {
               }
             place.name = sanitisedName;
             place.description = sanitisedDescription;
-            const newCategory = await Place.categoryDb.find( { name: newData.category, user: userid });
-            if (newData.category != "None"){
+//            const newCategory = await Place.categoryDb.find( { name: newData.category, user: userid });
+/*            if (newData.category != "None"){
             place.category = newCategory[0]._id;
-            }
+            } */
+            place.category = newData.category;
             place.lat = newData.latitude;
             place.long = newData.longitude;
             if(newData.latitude && newData.longitude){
@@ -326,10 +365,14 @@ const Places = {
     },
     category: {
         handler: async function (request, h) {
-            const userid = request.auth.credentials.id;
-            const user = await User.findById(userid);
-            const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
-            return h.view("category", { categories: userCategories });
+            const categories = Places.loadCategories();
+            return h.view("category", { categories: categories , personal: true});
+        }
+    },
+    socialCategory: {
+        handler: async function (request, h) {
+            const categories = Places.loadCategories();
+            return h.view("category", { categories: categories});
         }
     },
     addCategory: {
@@ -363,7 +406,7 @@ const Places = {
         handler: async function (request, h) {
             let places = await Place.placeDb.findAll();
             await Places.updateWeatherInfo(places);
-            places = await Place.placeDb.find({ }).lean(); 
+            places = await Place.placeDb.find({ social: true }).lean(); 
             return h.view("allmap", { places: places }); 
         }
     },
@@ -376,19 +419,6 @@ const Places = {
         handler: async function (request, h) {
             return h.view("addgpsmap");        
         }        
-    },
-    async loadPlaceInfo(placeId, loggedInUserId) {
-        const place = await Place.placeDb.findById(placeId).lean();
-        const user = await User.findById(loggedInUserId).lean();
-        const placeReviews = await Place.reviewDb.find( { place: place }).lean();
-        const placeComments = await Place.commentsDb.find( { place: place }).lean();
-        const placeInfo = {
-            place: place,
-            loggedInUser: user,
-            reviews: placeReviews,
-            comments: placeComments
-        }
-        return placeInfo;
     },
     async updateWeatherInfo(places){
         for (const place of places){
@@ -404,7 +434,22 @@ const Places = {
                 await placeData.save();
         }
     }
-}
+},
+    loadCategories() {
+        categories = [ 
+            "None", 
+            "City", 
+            "Town", 
+            "Landmark - Man Made",
+            "Landmark - Natural",
+            "Mountain",
+            "Hill",
+            "Beach",
+            "Lake",
+            "River",
+            "Island" ]
+            return categories;
+    }
 };
 
 module.exports = Places 

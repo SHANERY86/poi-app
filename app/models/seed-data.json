@@ -2,19 +2,19 @@
     "users": {
         "_model": "User",
         "shane": {
-            "name": "Shane Ryan",
+            "name": "shanery86",
             "email": "shanery86@gmail.com",
             "password": "$2a$10$/RcNOV.G5NMeu2Yofruht.kYYQWb5z3c6XhcKym1.f06ryT7y/3CO"
         },
         "sarah":
         {
-            "name": "Sarah Keane",
+            "name": "saharakeane",
             "email": "saharakeane@gmail.com",
             "password": "$2a$10$ZCNNdH8E8OE4crx25QKzKOzXcM3jgsNOMTMTvz4P5VvlYzy1HPfe2"
         },
         "cathy":
         {
-            "name": "Catherine Ryan",
+            "name": "Cathy02",
             "email": "cathy@gmail.com",
             "password": "$2a$10$q9SCtN.IEyGqOte1Gs8FMuOaaK37QAuuwo00J9ijnFjBVhkM0C9sO"
         },
@@ -25,33 +25,6 @@
             "password": "$2a$10$0x6NrAnrnFXk.pdsSSs8TuzjiNLeAPxcpwLK/TjzxIP2a0IyOJEmW"
         }
     },
-        "categories": {
-        "_model": "Category",
-        "citiesShane": {
-            "name": "Cities",
-            "user": "->users.shane"
-        },
-        "CitiesSarah": {
-            "name": "Cities",
-            "user": "->users.sarah"
-        },
-        "CitiesCathy": {
-            "name": "Cities",
-            "user": "->users.cathy"
-        },
-        "TownsShane": {
-            "name": "Towns",
-            "user": "->users.shane"
-        },
-        "TownsSarah": {
-            "name": "Towns",
-            "user": "->users.sarah"
-        },
-        "TownsCathy": {
-            "name": "Towns",
-            "user": "->users.cathy"
-        }
-    },
     "places": {
         "_model": "Place",
     "new york": {
@@ -59,7 +32,6 @@
         "description": "A very interesting city in the USA",
         "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1618947790/xy0x6r5px25yi471hh01.jpg",
         "user": "->users.shane",
-        "category": "->categories.citiesShane",
         "lat": 40.69, 
         "long": -74.04,
         "username": "->users.shane.name",
@@ -70,7 +42,6 @@
         "description": "The windy city",
         "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1619883447/lmnlfck10ekoicqffdml.jpg",
         "user": "->users.sarah",
-        "category": "->categories.CitiesSarah",
         "lat": 41.88, 
         "long": -87.62,
         "username": "->users.sarah.name",
@@ -79,9 +50,8 @@
     "copenhagen": {
         "name": "Copenhagen",
         "description": "A beautiful city in Denmark",
-        "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1618866667/nywpv5vxwizwtio2563m.png",
+        "image": "https://res.cloudinary.com/djmtnizt7/image/upload/v1619883691/x0r0ut8vqbuntwn7szqr.jpg",
         "user": "->users.cathy",
-        "category": "->categories.CitiesCathy",
         "lat": 55.67, 
         "long": 12.56,
         "username": "->users.cathy.name",

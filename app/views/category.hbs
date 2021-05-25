@@ -1,20 +1,23 @@
-{{> mainmenu subtitle="Select or create categories"}}
-<div class="uk-card uk-card-default uk-card-body uk-width-2-3 uk-align-center">
-    <form action="/createcat" method="POST">
-<div class="uk-flex">
-        <input class="uk-input" type="text" name="category" placeholder="Add new Category">
-        <button class="uk-button uk-button-primary uk-margin-left">Add</button>
-</div>
-    </form> 
-</div>
-<div class="uk-flex">
+{{> mainmenu subtitle="Select a category"}}
+    {{#if personal}}
+        <div class="uk-card uk-card-body uk-margin" >
+            <div class="uk-flex uk-child-width-1-6" uk-grid>
     {{#each categories}}
-    <div class="uk-flex-right uk-card uk-card-default uk-margin-left">
-        <a href="/deletecat/{{_id}}" style="margin:0" class =" uk-align-center"> 
-        <i class="fas fa-trash-alt" style="color:red" title="Delete" pos="bottom" uk-tooltip></i> </a> 
-    <div class="uk-card uk-padding uk-margin-small-bottom">    
-        <a href="/placesbycat/{{_id}}">{{name}}</a> 
-    </div>                
-    </div>
+        <div class="uk-card uk-padding uk-card-default uk-margin-small-bottom">    
+            <a href="/placesbycat/{{this}}">{{this}}</a> 
+        </div>                
     {{/each}}
-</div>
+            </div> 
+       </div>
+    {{/if}}
+    {{#unless personal}}
+            <div class="uk-card uk-card-body uk-margin" >
+            <div class="uk-flex uk-child-width-1-6" uk-grid>
+    {{#each categories}}
+        <div class="uk-card uk-padding uk-card-default uk-margin-small-bottom">    
+            <a href="/socialcategory/{{this}}">{{this}}</a> 
+        </div>                
+    {{/each}}
+            </div> 
+       </div>
+    {{/unless}}
