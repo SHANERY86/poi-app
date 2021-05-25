@@ -4,7 +4,7 @@ const Vision = require("@hapi/vision");
 const Cookie = require("@hapi/cookie");
 const ImageStore = require('./app/utils/image-store');
 const User = require('./app/models/user');
-const dotenv = require('dotenv');
+//const dotenv = require('dotenv');
 const handlebars = require('handlebars');
 const utils = require("./app/api/utils.js");
 
