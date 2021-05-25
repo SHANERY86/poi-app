@@ -8,7 +8,7 @@ const dotenv = require('dotenv');
 const handlebars = require('handlebars');
 const utils = require("./app/api/utils.js");
 
-
+/*
 const result = dotenv.config();
 if (result.error) {
   console.log(result.error.message);
