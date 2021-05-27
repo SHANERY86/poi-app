@@ -2,6 +2,7 @@ const User = require('../models/user');
 const Boom = require('@hapi/boom');
 const Joi = require('@hapi/joi');
 const Place = require('../models/place');
+const Places = require('./places');
 const sanitizeHtml = require('sanitize-html');
 const ImageStore = require("../utils/image-store");
 const bcrypt = require('bcrypt');
@@ -106,7 +107,7 @@ const Accounts = {
                 const sanitisedName = sanitizeHtml(payload.name);
                 const sanitisedPassword = sanitizeHtml(payload.password);
                 const hash = await bcrypt.hash(sanitisedPassword, saltRounds);
-                if (sanitisedName == "" || sanitisedPassword == ""){
+                if (sanitisedName == "" || sanitisedPassword == ""){            //this logic does not allow an empty output field
                   const message = "User Input blocked for security reasons"
                   throw Boom.badData(message);
                 }
@@ -160,14 +161,20 @@ const Accounts = {
         try {
         const sanitisedName = sanitizeHtml(userUpdate.name);
         const sanitisedPassword = sanitizeHtml(userUpdate.password);
-        const hash = await bcrypt.hash(sanitisedPassword, saltRounds);
+        let newPassword = "";
+        if(user.password == request.payload.password){
+          newPassword = user.password;
+        }
+        else{
+          newPassword = await bcrypt.hash(sanitisedPassword, saltRounds);
+        }
         if (sanitisedName == "" || sanitisedPassword == ""){
           const message = "User Input blocked for security reasons"
           throw Boom.badData(message);
         }
         user.name = sanitisedName;
         user.email = userUpdate.email;
-        user.password = hash;
+        user.password = newPassword;
         await user.save();
         const newUser = await User.findById(userid).lean();
         return h.view("settings", { user: newUser });
@@ -234,28 +241,27 @@ const Accounts = {
       return h.view("admindashboard", { users: users })
       }
     },
-    /*when the user wants to delete their account, this will gather their places and categories and delete them, and then delete their account. Will also delete any associated images
+    /*when the user wants to delete their account, this will gather their places and delete them, and then delete their account. Will also delete any associated images
     uploaded to cloudinary */
     deleteUser: {
       handler: async function(request, h) {
         const userid = request.params._id;
         const user = await User.findById(userid);
-        console.log(user);
+        const imageUrls = Places.loadSeedImages();
         const places = await Place.placeDb.find({ user: user._id });
-        places.forEach(async function(place) { 
-//          const placeObj = Place.placeDb.find( { _id: place._id });
+        for(const place of places) { 
           const imageId = await ImageStore.getImageId(place.image);
-          if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+          let deleteImage = true;
+          for(let i = 0; i < imageUrls.length; i++){
+          if(place.image == imageUrls[i]){
+              deleteImage = false;
+          }       
+          if(deleteImage){
               await ImageStore.deleteImage(imageId);
-        }
-        console.log("removing place..");
+          }
+          }
           await place.remove();
-        })
-        const categories = await Place.categoryDb.find( { user: user._id });
-        categories.forEach(async function(category){
-          const catObj = Place.categoryDb.find( { _id: category._id });
-          await catObj.remove();
-        })
+        }
         await user.remove();
         return h.redirect("/");
       }

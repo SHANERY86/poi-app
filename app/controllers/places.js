@@ -52,7 +52,6 @@ const Places = {
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
             const data = request.payload;
- //           const category = await Place.categoryDb.find({ name: data.category, user: user._id });
             const imageFile = request.payload.imagefile;
             if (Object.keys(imageFile).length > 0) {
             imageUrl = await ImageStore.uploadImage(imageFile);
@@ -66,7 +65,7 @@ const Places = {
                 const message = "User Input blocked for security reasons"
                 throw Boom.badData(message);
               }
-              let sanitisedDescriptionShort = "";
+              let sanitisedDescriptionShort = "";                                           //this will shorten the input for displaying in a neat way on a 'place card'
               if(sanitisedDescription.length > 300){
                   sanitisedDescriptionShort = sanitisedDescription.substring(0,300) + "...";
               }
@@ -82,10 +81,7 @@ const Places = {
                 category: data.category,
                 social: false
             });
-/*            if( data.category != "None"){
-                newPlace.category = category[0]._id;
-            } */
-            if(data.latitude && data.longitude){
+            if(data.latitude && data.longitude){                                            //if the user has entered GPS coordinates when adding a place
                 weatherReport = await Weather.getWeather(data.latitude,data.longitude);
                 newPlace.lat = data.latitude;
                 newPlace.long = data.longitude;
@@ -110,7 +106,7 @@ const Places = {
         parse: true
       }
     },
-    //displays the POI list without category filter
+    //displays the private POI list for a user
     places: {
         handler: async function (request, h) {
             try{
@@ -126,6 +122,7 @@ const Places = {
             }          
         }
     },
+    //displays the list of POIs that users have shared
     socialPlaces: {
         handler: async function (request, h) {
             let places = await Place.placeDb.find( { social: true } );
@@ -134,6 +131,7 @@ const Places = {
             return h.view("socialplaces", { places: places, });                       
     }
 },
+//displays list of POIs that users have shared filtered by selected category
     socialPlacesByCategory: {
         handler: async function (request, h) {
             const category = request.params.cat;
@@ -141,17 +139,15 @@ const Places = {
             return h.view("socialplaces", { places: places });
         }        
     },
+    //this presents detailed info about a POI when selected from the private list
     onePlace: {
         handler: async function (request, h) {
             const placeId = request.params.id;
             const place = await Place.placeDb.findById(placeId).lean();
-            const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();
-            const user = await User.findById(request.auth.credentials.id).lean();    
-            const placeComments = await Place.commentsDb.find( { place: place } ).lean(); 
-            await Places.loadRatingAvg(placeId); 
-            return h.view("place", { place: place, reviews: placeReviews, user: user, comments: placeComments });
+            return h.view("place", { place: place });
         }
     },
+        //this presents detailed info about a POI when selected from the social list
     onePlaceSocial: {
         handler: async function (request, h) {
             const placeId = request.params.id;
@@ -163,6 +159,8 @@ const Places = {
             return h.view("place", { place: place, reviews: placeReviews, user: user, comments: placeComments, social:true });
         }       
     },
+        //this shares a POI from a users private POI list, it will now be visible for all users in the social POI list
+        //creates an event that will be visible on the noticeboard to inform other users of the POI being shared
     sharePlace: {
         handler: async function (request, h) {
             const user = await User.findById(request.auth.credentials.id);
@@ -189,6 +187,8 @@ const Places = {
             return h.redirect("/places");
         }
     },
+    //this will remove the POI from the social list, meaning it will now only be visible to the user who created it in their private list
+    //also deletes the event tied to the share, which means the notification of this POI being shared will no longer show up on the notice board
     makePrivate: {
         handler: async function (request, h) {
             const placeId = request.params.id;
@@ -211,7 +211,7 @@ const Places = {
             return h.view("adminplaces", { places: places, user: user });            
         }
     }, 
-    //displays list of POIs with category filter
+    //displays list of private POIs with category filter
     placesByCategory: {
         handler: async function (request, h) {
             const category = request.params.cat; 
@@ -225,10 +225,9 @@ const Places = {
         handler: async function (request, h) {
             const userid = request.auth.credentials.id;
             const user = await User.findById(userid);
-            const userCategories = await Place.categoryDb.find({ user: user._id }).lean();
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId).lean();
-            return h.view("editplace", { place: place, categories: userCategories })
+            return h.view("editplace", { place: place })
         }
     },
     //shows the page to edit a POI as admin
@@ -284,10 +283,6 @@ const Places = {
               }
             place.name = sanitisedName;
             place.description = sanitisedDescription;
-//            const newCategory = await Place.categoryDb.find( { name: newData.category, user: userid });
-/*            if (newData.category != "None"){
-            place.category = newCategory[0]._id;
-            } */
             place.category = newData.category;
             place.lat = newData.latitude;
             place.long = newData.longitude;
@@ -301,8 +296,15 @@ const Places = {
             }
             const imageFile = request.payload.imagefile;
             if (Object.keys(imageFile).length > 0) {
-                if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+                const imageUrls = Places.loadSeedImages();
+                let deleteImage = true;
+                for(let i = 0; i < imageUrls.length; i++){
+                if(place.image == imageUrls[i]){
+                    deleteImage = false;
+                }       
+                if(deleteImage){
                     await ImageStore.deleteImage(imageId);
+                }
                 }
             newImageUrl = await ImageStore.uploadImage(imageFile);
             place.image = newImageUrl;
@@ -341,15 +343,22 @@ const Places = {
             return h.view("adminplaces", { places: places, user: user });        
         }
     },
-    //deletes a POI and deletes the image on the cloudinary app        
+    //deletes a POI and if the image isnt one of the few images related to the POIs associated with seed data, deletes the image      
     deletePlace: {
         handler: async function (request, h) {
             const placeId = request.params._id;
             const place = await Place.placeDb.findById(placeId);
             const imageId = await ImageStore.getImageId(place.image);
-/*            if(place.image != "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"){
+            const imageUrls = Places.loadSeedImages();
+            let deleteImage = true;
+            for(let i = 0; i < imageUrls.length; i++){
+            if(place.image == imageUrls[i]){
+                deleteImage = false;
+            }       
+            if(deleteImage){
                 await ImageStore.deleteImage(imageId);
-        } */
+            }
+            }
             await place.remove();
             return h.redirect("/places");
         }
@@ -380,45 +389,28 @@ const Places = {
             return h.view("adminplaces", { places: places, user: user });      
         }
     },
+    //displays list of category links, for list filtering by category type, clicking on a category on this page returns a private POI list filtered by that category
     category: {
         handler: async function (request, h) {
             const categories = Places.loadCategories();
             return h.view("category", { categories: categories , personal: true});
         }
     },
+    //displays list of category links for the social side of the site
     socialCategory: {
         handler: async function (request, h) {
             const categories = Places.loadCategories();
             return h.view("category", { categories: categories});
         }
     },
-    addCategory: {
-        handler: async function (request, h) {
-            const userid = request.auth.credentials.id;
-            const user = await User.findById(userid);
-            data = request.payload.category;
-            const newCategory = new Place.categoryDb({
-                name: data,
-                user: user
-            })
-            await newCategory.save();
-            return h.redirect("/category");
-        }
-    },
-    deleteCategory: {
-        handler: async function (request, h) {
-            const categoryId = request.params._id;
-            category = await Place.categoryDb.findById(categoryId);
-            await category.remove();
-            return h.redirect("/category");
-        }
-    },
+    //this is where the route for the iframe points to in the place.hbs file for displaying the map in a POI page
     placeMap: {
         handler: async function (request, h) {
             const place = await Place.placeDb.findById(request.params.id).lean();
         return h.view("placemap", { place: place } );
         }
     },
+    //this is the route for the iframe to display the big map on the page after you log in
     map: {
         handler: async function (request, h) {
             let places = await Place.placeDb.findAll();
@@ -430,16 +422,19 @@ const Places = {
             return h.view("allmap", { places: places }); 
         }
     },
+    //this will display the page with the big map
     mapView: {
         handler: async function (request, h) {
             return h.view("placesmap");        
         }
     },
+    //this is the route for the iframe for the map that assists a user in picking GPS co-ordinates when adding a POI
     addGPSView: {
         handler: async function (request, h) {
             return h.view("addgpsmap");        
         }        
     },
+    //this function will update the weather for a list of places
     async updateWeatherInfo(places){
         for (const place of places){
             if(place.lat && place.long){
@@ -455,6 +450,7 @@ const Places = {
         }
     }
 },
+//this loads the categories
     loadCategories() {
         categories = [ 
             "None", 
@@ -470,6 +466,19 @@ const Places = {
             "Island" ]
             return categories;
     },
+    loadSeedImages() {
+        imageUrls = [
+            "https://res.cloudinary.com/djmtnizt7/image/upload/v1618947790/xy0x6r5px25yi471hh01.jpg",
+            "https://res.cloudinary.com/djmtnizt7/image/upload/v1619883447/lmnlfck10ekoicqffdml.jpg",
+            "https://res.cloudinary.com/djmtnizt7/image/upload/v1619883691/x0r0ut8vqbuntwn7szqr.jpg",
+            "https://res.cloudinary.com/djmtnizt7/image/upload/v1622027863/kt9u8u8slxr7qwfis37r.jpg",
+            "https://res.cloudinary.com/djmtnizt7/image/upload/v1622029501/Melbourne2_j3cvkf.jpg",
+            "https://res.cloudinary.com/djmtnizt7/image/upload/v1622029684/grandcanyon_hdwaac.jpg",
+            "https://res.cloudinary.com/djmtnizt7/image/upload/v1616502936/globe_binoc_jdgn3n.png"
+        ]
+        return imageUrls;
+    },
+    //this function will calculate the average rating for a POI, given a place ID it will find a list of its submitted ratings and average them. 
     async loadRatingAvg(placeId){
         const placeRatings = await Place.ratingDb.find( { place: placeId } );
         let ratingstotal = 0;
@@ -488,5 +497,6 @@ const Places = {
         }
     }
 };
+
 
 module.exports = Places 

@@ -9,24 +9,23 @@
             <textarea class="uk-textarea" rows="5" type="text" name="description">{{place.description}}</textarea>
         </div>
         <div class="uk-margin">
-                  <label>Enter Category (create categories from "view by category menu")</label>
-                    <select class="uk-select" type="text" name="category">
-                        <option >{{place.category}}</option>
-                        <option>None</option>
-                        <option>City</option>
-                        <option>Town</option>
-                        <option>Landmark - Man made</option>
-                        <option>Landmark - Natural</option>
-                        <option>Mountain</option>
-                        <option>Hill</option>                        
-                        <option>Beach</option>
-                        <option>Lake</option>
-                        <option>River</option>
-                        <option>Island</option>
-                        <option>Establishment</option> 
-                        <option>Other</option>                                         
-                    </select>                                                  
-                    </select> 
+            <label>Enter Category (create categories from "view by category menu")</label>
+            <select class="uk-select" type="text" name="category">
+                <option >{{place.category}}</option>
+                <option>None</option>
+                <option>City</option>
+                <option>Town</option>
+                <option>Landmark - Man made</option>
+                <option>Landmark - Natural</option>
+                <option>Mountain</option>
+                <option>Hill</option>                        
+                <option>Beach</option>
+                <option>Lake</option>
+                <option>River</option>
+                <option>Island</option>
+                <option>Establishment</option> 
+                <option>Other</option>                                         
+            </select>                                                  
         </div>
             <div class="uk-flex">
                 <div class="uk-margin uk-width-1-3">
@@ -36,35 +35,34 @@
                         <textarea class="uk-input" id="lng" type="text" name="longitude" placeholder="Longitude">{{place.long}}</textarea>  
                     </div>        
                       
-                <label for="form-horizontal-text">Change Image</label>
-                <input type="file" class="uk-input" name="imagefile" accept="image/png, image/jpeg">
+                    <label for="form-horizontal-text">Change Image</label>
+                    <input type="file" class="uk-input" name="imagefile" accept="image/png, image/jpeg">
                 </div>
         
                 <div class="uk-width-expand">
-                <div id="map" class="uk-card uk-margin">
-                    <div class="uk-flex">
-                    <div class="uk-card uk-card-body uk-padding-small uk-width-auto">
-                        Set pin and click OK for co-ordinates
-                        </div>
-                            <div class="uk-card uk-margin">
-                                <button type="button" onclick="getGPS();" class="uk-button uk-button-default uk-button-small">OK</button>
-                                </div>                        
+                    <div id="map" class="uk-card uk-margin">
+                            <div class="uk-flex">
+                            <div class="uk-card uk-card-body uk-padding-small uk-width-auto">
+                                Set pin and click OK for co-ordinates
+                            </div>
+                                    <div class="uk-card uk-margin">
+                                        <button type="button" onclick="getGPS();" class="uk-button uk-button-default uk-button-small">OK</button>
+                                    </div>                        
+                            </div>
+                        <iframe id="iframe"  src="/addgpsmap" width="650", height="350"></iframe>
                     </div>
-                    <iframe id="iframe"  src="/addgpsmap" width="650", height="350"></iframe>
-                </div>
+                </div> 
             </div> 
-            </div> 
-    <div class="uk-margin-medium-top">   
-        <input type="submit" value="Update" class= "uk-button uk-button-primary uk-button-default uk-margin">
-    </div>  
+            <div class="uk-margin-medium-top">   
+                <input type="submit" value="Update" class= "uk-button uk-button-primary uk-button-default uk-margin">
+            </div>  
     </form>
         <script>
         function getGPS(){
-console.log(latlng);
-document.getElementById("lat").innerHTML = Math.round(latlng.lat* 100)/100;
-document.getElementById("lng").innerHTML = Math.round(latlng.lng* 100)/100;
-        }
+                document.getElementById("lat").innerHTML = Math.round(latlng.lat* 100)/100;
+                document.getElementById("lng").innerHTML = Math.round(latlng.lng* 100)/100;
+                }
       
-    </script>
+        </script>
 </div> 
 {{> error }} 
