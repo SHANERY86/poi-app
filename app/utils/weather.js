@@ -7,8 +7,6 @@ if (result.error) {
   process.exit(1);
 }
 */
-
-
 const apiKey = process.env.apiKey;
 
 const Weather = {
