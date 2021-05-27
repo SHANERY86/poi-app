@@ -28,7 +28,9 @@ const Social = {
                 existingRating[0].rating = ratingInput;
                 await existingRating[0].save();
                 const ratingEvent = await Place.eventDb.find( { type:"gave a rating", username: user.name, "place.id": place._id } );
-                ratingEvent[0].remove();
+                if(ratingEvent[0]){
+                await ratingEvent[0].remove();
+                }
             }
              const placeRatings = await Place.ratingDb.find( { place: placeId } );
              let ratingstotal = 0;
@@ -87,6 +89,13 @@ const Social = {
             const currentDateAndTime = Social.getDateAndTime();
             const inputReview = request.payload.review;
             const sanitizedReview = sanitizeHtml(inputReview);
+            let sanitizedShortReview = "";
+            if (sanitizedReview.length > 300){
+             sanitizedShortReview = sanitizedReview.substring(0,300) + "....";
+            }
+            if (sanitizedReview.length <= 300){
+                sanitizedShortReview = sanitizedReview;
+            }
             if(sanitizedReview == ""){
                 const message = "Your review has been blocked for security reasons";
                 throw Boom.badData(message);
@@ -95,7 +104,7 @@ const Social = {
                 userId: userid,
                 username: user.name,
                 place: place,
-                review: inputReview,
+                review: sanitizedReview,
                 dateAndTime: currentDateAndTime.dateAndTime,
             })
             await review.save();
@@ -105,7 +114,7 @@ const Social = {
                 dateAndTime: currentDateAndTime.dateAndTime,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
                 utc: currentDateAndTime.utc,
-                content: sanitizedReview,
+                content: sanitizedShortReview,
                 place: {
                     id: placeId,
                     name: place.name,
@@ -147,9 +156,18 @@ const Social = {
                 const message = "Your review has been blocked for security reasons";
                 throw Boom.badData(message);
             } 
+            let sanitisedShortEdit = "";
+            if (sanitisedEdit.length > 300){
+                sanitisedShortEdit = sanitisedEdit.substring(0,300) + "....";
+               }
+               if (sanitizedReview.length <= 300){
+                   sanitisedShortEdit = sanitisedEdit;
+               }
             review.review = sanitisedEdit + " (edited)";
             const oldEvent = await Place.eventDb.find( { refid: review._id } );
-            oldEvent[0].remove();
+            if (oldEvent[0]){
+            await oldEvent[0].remove();
+            }
             const placeId = review.place;
             const place = await Place.placeDb.findById(placeId);
             const currentDateAndTime = Social.getDateAndTime();
@@ -159,7 +177,7 @@ const Social = {
                 dateAndTime: currentDateAndTime.dateAndTime,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
                 utc: currentDateAndTime.utc,
-                content: sanitisedEdit,
+                content: sanitisedShortEdit,
                 place: {
                     id: placeId,
                     name: place.name,
@@ -189,8 +207,10 @@ const Social = {
             const review = await Place.reviewDb.findById( { _id: request.params.id } );
             const placeId = review.place;
             const reviewEvent = await Place.eventDb.find( { refid: review._id } );
+            if (reviewEvent[0]){
             reviewEvent[0].remove();
-            review.remove();
+            }
+            await review.remove();
             const placeInfo = await Social.loadPlaceInfo(placeId,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
@@ -216,6 +236,13 @@ const Social = {
                 const message = "Your comment was blocked for security reasons";
                 throw Boom.badData(message);
             }
+            let sanitisedShortInput = "";
+            if (sanitisedInput.length > 300){
+                sanitisedShortInput = sanitisedInput.substring(0,300) + "....";
+               }
+               if (sanitisedInput.length <= 300){
+                   sanitisedShortInput = sanitisedInput;
+               }
             const currentDateAndTime = Social.getDateAndTime();
             const comment = new Place.commentsDb({
                 userId: user._id,
@@ -231,7 +258,7 @@ const Social = {
                 dateAndTime: currentDateAndTime.dateAndTime,
                 utc: currentDateAndTime.utc,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
-                content: sanitisedInput,
+                content: sanitisedShortInput,
                 place: {
                     id: placeId,
                     name: place.name,
@@ -320,13 +347,20 @@ const Social = {
             const replyid = replies[replies.length - 1]._id;
             await comment.save();
             const place = await Place.placeDb.findById( comment.place ).lean();
+            let sanitisedShortInput = "";
+            if (sanitisedInput.length > 300){
+                sanitisedShortInput = sanitisedInput.substring(0,300) + "....";
+               }
+               if (sanitisedInput.length <= 300){
+                   sanitisedShortInput = sanitisedInput;
+               }
             const event = new Place.eventDb({
                 type: "replied",
                 refid: replyid,
                 dateAndTime: dateAndTime.dateAndTime,
                 utc: dateAndTime.utc,
                 dayAndMonth: dateAndTime.dayAndMonth,
-                content: sanitisedInput,
+                content: sanitisedShortInput,
                 place: {
                     id: place._id,
                     name: place.name,
@@ -359,13 +393,20 @@ const Social = {
                 const replies = commentToUpdate.replies; 
                 const replyid = replies[replies.length - 1]._id;
                 const place = await Place.placeDb.findById( commentToUpdate.place ).lean();
+                let sanitisedShortInput = "";
+                if (sanitisedInput.length > 300){
+                    sanitisedShortInput = sanitisedInput.substring(0,300) + "....";
+                   }
+                   if (sanitisedInput.length <= 300){
+                       sanitisedShortInput = sanitisedInput;
+                   }
                 const event = new Place.eventDb({
                     type: "replied",
                     refid: replyid,
                     dateAndTime: dateAndTime.dateAndTime,
                     utc: dateAndTime.utc,
                     dayAndMonth: dateAndTime.dayAndMonth,
-                    content: sanitisedInput,
+                    content: sanitisedShortInput,
                     place: {
                         id: place._id,
                         name: place.name,
@@ -413,16 +454,25 @@ const Social = {
             comment.comment = sanitisedInput;
             await comment.save();
             const oldEvent = await Place.eventDb.find( { refid: comment._id } );
-            oldEvent[0].remove();
+            if(oldEvent[0]){
+            await oldEvent[0].remove();
+            }
             const currentDateAndTime = Social.getDateAndTime();
             const place = await Place.placeDb.findById(comment.place);
+            let sanitisedShortInput = "";
+            if (sanitisedInput.length > 300){
+                sanitisedShortInput = sanitisedInput.substring(0,300) + "....";
+               }
+               if (sanitisedInput.length <= 300){
+                   sanitisedShortInput = sanitisedInput;
+               }
             const event = new Place.eventDb({
                 type: "edited a comment",
                 refid: comment._id,
                 dateAndTime: currentDateAndTime.dateAndTime,
                 dayAndMonth: currentDateAndTime.dayAndMonth,
                 utc: currentDateAndTime.utc,
-                content: sanitisedInput,
+                content: sanitisedShortInput,
                 place: {
                     id: comment.place,
                     name: place.name,
@@ -450,14 +500,23 @@ const Social = {
                 const place = await Place.placeDb.findById(returnedComment.place);
                 const oldEvent = await Place.eventDb.find( { refid: replyId } );
                 const currentDateAndTime = Social.getDateAndTime();
-                oldEvent[0].remove();
+                if(oldEvent[0]){
+                await oldEvent[0].remove();
+                }
+                let sanitisedShortInput = "";
+                if (sanitisedInput.length > 300){
+                    sanitisedShortInput = sanitisedInput.substring(0,300) + "....";
+                   }
+                   if (sanitisedInput.length <= 300){
+                       sanitisedShortInput = sanitisedInput;
+                   }
                 const event = new Place.eventDb({
                     type: "replied",
                     refid: replyId,
                     dateAndTime: currentDateAndTime.dateAndTime,
                     dayAndMonth: currentDateAndTime.dayAndMonth,
                     utc: currentDateAndTime.utc,
-                    content: sanitisedInput,
+                    content: sanitisedShortInput,
                     place: {
                         id: returnedComment.place,
                         name: place.name,
@@ -489,7 +548,9 @@ const Social = {
             const place = await Place.placeDb.findById(comment.place).lean();
             const event = await Place.eventDb.find( { refid: comment._id } );
             await comment.remove();
+            if(event[0]){
             await event[0].remove();
+            }
             const placeInfo = await Social.loadPlaceInfo(place._id,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
