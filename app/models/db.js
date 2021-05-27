@@ -7,6 +7,7 @@ if (result.error) {
 } 
 */
 
+
 async function seed() {
   var seeder = require('mais-mongoose-seeder')(Mongoose);
   const data = require('./seed-data.json');
