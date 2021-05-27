@@ -39,6 +39,7 @@ const SocialApi = {
         handler: async function (request, h) {
             const inputReview = request.payload;
             const review = new Place.reviewDb(inputReview);
+            console.log(review);
             await review.save();
             return review;
         }

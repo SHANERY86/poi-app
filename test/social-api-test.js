@@ -63,10 +63,11 @@ suite("Social API tests", function ()  {
             username: u1.name,
             place: p1,
             review: reviewContent,
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const returnedReview = await poiService.makeReview(review);
         const reviews = await poiService.getReviews();
+        console.log(reviews);
         assert.equal(reviews.length, 1);
         assert.equal(reviews[0].review, review.review);
     })
@@ -81,7 +82,7 @@ suite("Social API tests", function ()  {
             username: u1.name,
             place: p1,
             review: reviewContent,
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const returnedReview = await poiService.makeReview(review);
         const reviews = await poiService.getReviews();
@@ -105,7 +106,7 @@ suite("Social API tests", function ()  {
             username: u1.name,
             place: p1,
             review: reviewContent,
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const returnedReview = await poiService.makeReview(review);
         let reviews = await poiService.getReviews();
@@ -129,7 +130,7 @@ suite("Social API tests", function ()  {
             username: u1.name,
             place: p1,
             comment: commentContent,
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const returnedComment = await poiService.makeComment(comment);
         const comments = await poiService.getAllComments();
@@ -140,7 +141,7 @@ suite("Social API tests", function ()  {
             user: u1,
             username: u1.name,
             reply: "reply",
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const commentAfterReply = await poiService.makeReply(returnedComment._id,reply);
 
@@ -159,7 +160,7 @@ suite("Social API tests", function ()  {
             username: u1.name,
             place: p1,
             comment: commentContent,
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const returnedComment = await poiService.makeComment(comment);
         const comments = await poiService.getAllComments();
@@ -176,7 +177,7 @@ suite("Social API tests", function ()  {
             user: u1,
             username: u1.name,
             reply: "reply",
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const commentAfterReply = await poiService.makeReply(returnedComment._id,reply);
 
@@ -199,7 +200,7 @@ suite("Social API tests", function ()  {
             username: u1.name,
             place: p1,
             comment: commentContent,
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const returnedComment = await poiService.makeComment(comment);
         const comments = await poiService.getAllComments();
@@ -210,7 +211,7 @@ suite("Social API tests", function ()  {
             user: u1,
             username: u1.name,
             reply: "reply",
-            dateAndTime: dateAndTime
+            dateAndTime: dateAndTime.dateAndTime
         }
         const commentAfterReply = await poiService.makeReply(returnedComment._id,reply);
 
