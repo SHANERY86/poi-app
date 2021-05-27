@@ -10,16 +10,21 @@ const NoticeBoard = {
         handler: async function(request, h) {
             try{
             const userid = request.auth.credentials.id;
-            const user = await User.findById(userid);
-            const socialPlaces = await Place.placeDb.find({ social : true });
+            const socialPlaces = await Place.placeDb.find({ social : true });     //this returns a list of places that have been shared by users
             const socialPlaceIds = [];
             for (const place of socialPlaces){
                 socialPlaceIds.push(place._id)
             } 
             const events = await Place.eventDb.find({ 
-                "place.id": { $in: socialPlaceIds }, 
-                type: { $nin: "replied" }, 
+                "place.id": { $in: socialPlaceIds },    //this ensures that events about shared places only appear on the noticeboard, events about places that have been 
+                type: { $nin: "replied" },              //made private wont show, also does not return reply events
             }).lean();
+
+
+            //the code in the block below will push reply events that are associated with comments that the logged in user made, ensuring that the user only
+            //receives notifications about replies for their own comments. This will stop the noticeboard becoming cluttered with reply events that have
+            //nothing to do with the user if a long string of messages back and forth between two users occurs.
+
             const replyEvents = await Place.eventDb.find( { type: "replied" } );
             const replyEventsForYou_ids = [];
             for (const replyEvent of replyEvents){
@@ -35,6 +40,15 @@ const NoticeBoard = {
             for (const replyEvent of replyEventsForYou){
                 events.push(replyEvent);
             }
+
+            //the code block below is gathering events in blocks of time. The blocks are 'just now','today','yesterday' and 'later'
+            //this will organise and display notifications on the notice board in blocks of time that they occurred
+            //the 'just now' will check to see if the event occurred in the last 5 minutes
+            //the 'today' block will check to see if the event occurred on the current date
+            //the 'yesterday' block will check to see if the event occurred on yesterdays date
+            //the 'later' block will gather all of the remaining events, and arrange them into objects with the appropriate date
+            //this provides a neat and organised time orientated display of notifications
+
             const currentDateAndTime = Social.getDateAndTime();
             const currentDate = currentDateAndTime.dateAndTime.substr(0,2);
             const today = new Date()
@@ -80,6 +94,9 @@ const NoticeBoard = {
             }
             laterEvents.unshift(entry);
             }
+
+
+
             if(justNowEvents.length == 0 && todaysEvents.length == 0 && yesterdaysEvents == 0 && laterEvents == 0){
                 return h.view("noticeboard", { empty: true } );
             }

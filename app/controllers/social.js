@@ -7,6 +7,7 @@ const Boom = require('@hapi/boom');
 const sanitizeHtml = require('sanitize-html');
 
 const Social = {
+    //this method submits a rating for a POI
     rating: {
         handler: async function (request, h) {
             const userid = request.auth.credentials.id;
@@ -14,9 +15,9 @@ const Social = {
             const user = await User.findById(userid);
             const placeId = request.params.id;
             const place = await Place.placeDb.findById(placeId).lean();
-            const existingRating = await Place.ratingDb.find({ user: user, place: place });
+            const existingRating = await Place.ratingDb.find({ user: user, place: place });  //searches for an existing rating for this place by this user
             const ratingInput = request.payload.rating;
-            if(!existingRating[0]){
+            if(!existingRating[0]){                     //if there is no exisiting rating for this POI by this user, it creates a new rating 
             const rating = new Place.ratingDb({
                 user: user,
                 place: place,
@@ -24,16 +25,20 @@ const Social = {
              })
              await rating.save();
             }
-            if(existingRating[0]){
-                existingRating[0].rating = ratingInput;
+            if(existingRating[0]){                      //if a user has already rated this POI, it will update the old one instead of making a new one 
+                existingRating[0].rating = ratingInput;     //this means a user can only make one rating per POI
                 await existingRating[0].save();
-                const ratingEvent = await Place.eventDb.find( { type:"gave a rating", username: user.name, "place.id": place._id } );
-                if(ratingEvent[0]){
-                await ratingEvent[0].remove();
-                }
+                const ratingEvent = await Place.eventDb.find( {  //creates a rating event, which will notify other users of this users rating for this POI
+                    type:"gave a rating",                           //this rating event is processed and shown on the notice board when refreshed
+                    username: user.name, 
+                    "place.id": place._id } 
+                ); 
+                if(ratingEvent[0]){                 //when a rating has been updated, it will delete the original rating event, so the latest and most up to date rating
+                await ratingEvent[0].remove();      // for this user on this POI is shown only. This stop the notice board being cluttered with multiple ratings
+                }                                   //for the same thing by the same person.
             }
-             const placeRatings = await Place.ratingDb.find( { place: placeId } );
-             let ratingstotal = 0;
+             const placeRatings = await Place.ratingDb.find( { place: placeId } );          //this block of code is going to average all the ratings for this place
+             let ratingstotal = 0;                                                          //so the average can be seen in the ratings card
              let ratingsAvg = 0;
              let index = 0;
              placeRatings.forEach(function(placeRating) {
@@ -44,9 +49,10 @@ const Social = {
              const placeObj = await Place.placeDb.findById(placeId);
              placeObj.numberOfRatings = index;
              placeObj.rating = Math.round(ratingsAvg * 10)/10;
-             await placeObj.save();
+             await placeObj.save(); 
+
              const dateAndTime = Social.getDateAndTime();
-             const event = new Place.eventDb({
+             const event = new Place.eventDb({                                      //this is creating a new rating event, for display on the noticeboard
                  type: "gave a rating",
                  dateAndTime: dateAndTime.dateAndTime,
                  utc: dateAndTime.utc,
@@ -60,7 +66,7 @@ const Social = {
                  username: user.name
              })
              event.save();
-             const placeInfo = await Social.loadPlaceInfo(placeId,user._id);
+             const placeInfo = await Social.loadPlaceInfo(placeId,user._id);    //this is a function (detailed below) to load all the info about a POI for passing to handlebars
              return h.view("place", { 
                  place: placeInfo.place, 
                  reviews: placeInfo.reviews, 
@@ -72,6 +78,7 @@ const Social = {
              }     
          }
     },
+    //this will display the page to write a review
     writeReview: {
         handler: async function(request, h) {
             const placeId = request.params.id;
@@ -79,6 +86,7 @@ const Social = {
             return h.view("review", { place: placeObj });
         }
     },
+    //this will take the review written by a user, process it and display the POI with the new review presented
     review: {
         handler: async function(request, h) {
             const placeId = request.params.id;
@@ -89,14 +97,14 @@ const Social = {
             const currentDateAndTime = Social.getDateAndTime();
             const inputReview = request.payload.review;
             const sanitizedReview = sanitizeHtml(inputReview);
-            let sanitizedShortReview = "";
-            if (sanitizedReview.length > 300){
-             sanitizedShortReview = sanitizedReview.substring(0,300) + "....";
+            let sanitizedShortReview = "";                  
+            if (sanitizedReview.length > 300){                                      //this code is generating a trimmed version of the review for display on the 
+             sanitizedShortReview = sanitizedReview.substring(0,300) + "....";      //noticeboard, if the review is more than 300 characters long
             }
             if (sanitizedReview.length <= 300){
                 sanitizedShortReview = sanitizedReview;
             }
-            if(sanitizedReview == ""){
+            if(sanitizedReview == ""){                                              //does not allow a blank review to be submitted if the sanitised version is blank
                 const message = "Your review has been blocked for security reasons";
                 throw Boom.badData(message);
             } 
@@ -108,7 +116,7 @@ const Social = {
                 dateAndTime: currentDateAndTime.dateAndTime,
             })
             await review.save();
-            const event = new Place.eventDb({
+            const event = new Place.eventDb({                                   //new review event created for the noticeboard
                 type: "submitted a review",
                 refid: review._id,
                 dateAndTime: currentDateAndTime.dateAndTime,
@@ -207,8 +215,8 @@ const Social = {
             const review = await Place.reviewDb.findById( { _id: request.params.id } );
             const placeId = review.place;
             const reviewEvent = await Place.eventDb.find( { refid: review._id } );
-            if (reviewEvent[0]){
-            reviewEvent[0].remove();
+            if (reviewEvent[0]){                                                       //if a review is deleted, the review event is also deleted
+            reviewEvent[0].remove();                                                    //keeping the noticeboard free of content that no longer exists
             }
             await review.remove();
             const placeInfo = await Social.loadPlaceInfo(placeId,userid);
@@ -281,8 +289,15 @@ const Social = {
             }
 
     },
+    //I have implemented a sort of overcomplicated way of presenting the user with the comment or reply that they are replying to
+    //I set up the replying functionality to send the user to a new page, with the comment they are replying to on display as they type.
+    //it is probably simpler and neater to have a text box appear at the bottom with a click, but I need to learn how to do that yet..
+    //the 'reply' hbs page has two conditional states, one for replying to comments and another for replying to replies, to avoid making another unnecessary file
+    //the form in the comment conditional state will generate a reply for a primary or top comment
+    //this method below will return the 'reply' page in the comment conditional state, meaning that a primary top comment was selected for reply
+    //when a user selects a reply to reply to, the replies are stored in an array inside the comment object, meaning it needs to be accessed in a different way
     replyView: {
-        handler: async function(request, h) { 
+        handler: async function(request, h) {       
             const commentId = request.params.id;
             const comment = await Place.commentsDb.findById( { _id: commentId } ).lean();
             return h.view("reply", { comment: comment } );                
@@ -292,23 +307,23 @@ const Social = {
         handler: async function(request, h) { 
                 const replyId = request.params.id;
                 var reply = null;
-                const comments = await Place.commentsDb.find({}).lean();
-                comments.forEach(function(comment){
-                    const replies = comment.replies;
-                    for(let i = 0; i < replies.length; i++){
-                        if(replies[i]._id == replyId){
-                            reply = replies[i];
-                        }
-                    }
-                })
+                const comments = await Place.commentsDb.find({}).lean();           //to allow the user to view the reply while they are responding..
+                comments.forEach(function(comment){                                 //I made it so a new page loads displaying the reply..
+                    const replies = comment.replies;                                //the replies are an array within a comment object
+                    for(let i = 0; i < replies.length; i++){                        //this code is iterating through the comments, and the replies within the comments..
+                        if(replies[i]._id == replyId){                              //to find the right reply to display
+                            reply = replies[i];                                     //there is probably a neater way to do this with mongoose, but this works for now
+                        }                                                           //it will display the 'editcomment' page, with a reply object sent to it
+                    }                                                               //meaning it will load this page in the appropriate conditional dependant state  
+                })                                                                  //the 'editcomment' hbs page is used to edit both commments and replies
                 return h.view("editcomment", { reply: reply } ); 
             }   
     },
-    replyToReplyView: {
-        handler: async function(request, h) {
-            const replyId = request.params.id;
-            var reply = null;
-            const comments = await Place.commentsDb.find({}).lean();
+    replyToReplyView: {                                                             
+        handler: async function(request, h) {                               //because a reply is an array inside a comment object there must be a separate method..
+            const replyId = request.params.id;                              //to display the appropriate reply, when replying to a reply.
+            var reply = null;                                               //then this method will return the 'reply' hbs with a form that will generate a reply for a..
+            const comments = await Place.commentsDb.find({}).lean();        //reply within a comment
             comments.forEach(function(comment){
                 const replies = comment.replies;
                 for(let i = 0; i < replies.length; i++){
@@ -320,6 +335,8 @@ const Social = {
             return h.view("reply", { reply: reply } );   
         }
     },
+    //this method below will process the reply and save it. It checks the input id to see if it is a reply to a reply or a reply to a comment
+    //if it is a reply to a comment, it creates a new comment object, if its a reply, it will push a new reply to the replies array within the appropriate comment object
     addReply: {
         handler: async function(request, h) { 
             try{
@@ -328,7 +345,8 @@ const Social = {
             var commentForLoading = null;
             const userid = request.auth.credentials.id;
             const user = await User.findById(userid);
-            if(comment){
+
+            if(comment){                                        //if the input id is found to be a comment it will process the block below
             const dateAndTime = Social.getDateAndTime();
             const input = request.payload.reply;
             const sanitisedInput = sanitizeHtml(input);
@@ -354,7 +372,7 @@ const Social = {
                if (sanitisedInput.length <= 300){
                    sanitisedShortInput = sanitisedInput;
                }
-            const event = new Place.eventDb({
+            const event = new Place.eventDb({               // new comment event for the noticeboard
                 type: "replied",
                 refid: replyid,
                 dateAndTime: dateAndTime.dateAndTime,
@@ -371,8 +389,9 @@ const Social = {
             await event.save();
             commentForLoading = comment;
             }
-            if(!comment){
-                const replyInfo = await Social.getCommentAndReplyIndex(inputId);
+
+            if(!comment){                               //if the input id is not found to be a comment, they are replying to a reply, and the reply is saved a different way
+                const replyInfo = await Social.getCommentAndReplyIndex(inputId);  //this returns the comment and index of the reply array for the reply selected (see below)
                 const returnedComment = replyInfo.comment;
                 const commentToUpdate = await Place.commentsDb.findById(returnedComment._id);
                 const dateAndTime = Social.getDateAndTime();
@@ -417,6 +436,8 @@ const Social = {
                 await event.save();            
                 commentForLoading = commentToUpdate;
             }
+
+
             const placeInfo = await Social.loadPlaceInfo(commentForLoading.place,user._id);
             return h.view("place", { 
                 place: placeInfo.place, 
@@ -429,6 +450,7 @@ const Social = {
         }               
         }                           
     },
+    //displays an edit page for a comment
     editCommentDisplay: {
         handler: async function(request, h) { 
             const commentId = request.params.id;
@@ -436,6 +458,7 @@ const Social = {
             return h.view("editcomment", { comment: comment } );
         }       
     },
+    //similar to 'addReply', this method will check to see if the input id is a comment or a reply and act accordingly
     editComment: {
         handler: async function(request, h) {
             try{
@@ -454,7 +477,7 @@ const Social = {
             comment.comment = sanitisedInput;
             await comment.save();
             const oldEvent = await Place.eventDb.find( { refid: comment._id } );
-            if(oldEvent[0]){
+            if(oldEvent[0]){                                                        //deletes old event, a new one created below, keeps most up to date info on noticeboard
             await oldEvent[0].remove();
             }
             const currentDateAndTime = Social.getDateAndTime();
@@ -572,20 +595,24 @@ const Social = {
             const comment = replyInfo.comment;
             const index = replyInfo.replyIndex;
             comment.replies[index].remove();
-            await comment.save();
+            const event = await Place.eventDb.find( { refid: replyId } );
+            if(event[0]){
+                await event[0].remove();
+                }            
             const place = await Place.placeDb.findById(comment.place).lean();
             const placeInfo = await Social.loadPlaceInfo(place._id,userid);
             return h.view("place", { 
                 place: placeInfo.place, 
                 reviews: placeInfo.reviews, 
                 user: placeInfo.loggedInUser, 
-                comments: placeInfo.comments, social:true } ); 
+                comments: placeInfo.comments, social: true } ); 
             }  catch (err) {
                 return h.view("errorpage", {
                     errors: [{ message: err.message }] });               
             }                      
         }
     },
+    //loads all the info needed for displaying info on a single more detailed POI page
     async loadPlaceInfo(placeId, loggedInUserId) {
         const place = await Place.placeDb.findById(placeId).lean();
         const user = await User.findById(loggedInUserId).lean();
@@ -599,6 +626,7 @@ const Social = {
         }
         return placeInfo;
     },
+    //this takes the id of a reply, and puts out its associated comment, and the associated index in the reply array of that comment object
     async getCommentAndReplyIndex(replyId) {
         var returnedComment = null;
         var replyIndex = null;
@@ -614,6 +642,7 @@ const Social = {
         })
         return( { comment: returnedComment, replyIndex: replyIndex });
     },
+    //gets time and date information 
     getDateAndTime() {
 //      const d = new Date(2021,4,23,0,0,0);
       const d = new Date();

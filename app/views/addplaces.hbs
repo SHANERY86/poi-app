@@ -7,7 +7,7 @@
                 <label>Enter Location Description</label> 
                 <textarea class="uk-textarea" rows="5" type="text" name="description" placeholder="Description"></textarea>
             </div>
-                    <div class="uk-margin">
+                <div class="uk-margin">
                   <label>Select Category (create categories from "view by category menu")</label>
                     <select class="uk-select" type="text" name="category">
                         <option>None</option>
@@ -24,40 +24,39 @@
                         <option>Establishment</option> 
                         <option>Other</option>                                         
                     </select>  
-        </div>
-             <div class="uk-flex">
-                 <div class="uk-card uk-margin uk-width-1-3">
-                    <div class="uk-margin">
-                    <label>Enter GPS Co-ordinates</label>  
-                    <textarea class="uk-input" id="lat" type="text" name="latitude" placeholder="Latitude"></textarea>
-                    <textarea class="uk-input" id="lng" type="text" name="longitude" placeholder="Longitude"></textarea>          
-                </div> 
-          <label for="form-horizontal-text">Select Image</label>
-            <input type="file" class="uk-input" name="imagefile" accept="image/png, image/jpeg">
-        </div>  
-        <div class="uk-width-expand">
-            <div id="map" class="uk-card uk-margin">
-                <div class="uk-flex">
-                <div class="uk-card uk-card-body uk-padding-small uk-width-auto">
-                    Set pin and click OK for co-ordinates
-                    </div>
-                        <div class="uk-card uk-margin">
-                            <button type="button" onclick="getGPS();" class="uk-button uk-button-default uk-button-small">OK</button>
-                            </div>                        
                 </div>
-                <iframe id="iframe" src="/addgpsmap" width="650", height="350"></iframe>
-            </div>
-        </div>
+             <div class="uk-flex">
+                    <div class="uk-card uk-margin uk-width-1-3">
+                        <div class="uk-margin">
+                            <label>Enter GPS Co-ordinates</label>  
+                            <textarea class="uk-input" id="lat" type="text" name="latitude" placeholder="Latitude"></textarea>
+                            <textarea class="uk-input" id="lng" type="text" name="longitude" placeholder="Longitude"></textarea>          
+                        </div> 
+                        <label for="form-horizontal-text">Select Image</label>
+                        <input type="file" class="uk-input" name="imagefile" accept="image/png, image/jpeg">
+                    </div>  
+                <div class="uk-width-expand">
+                    <div id="map" class="uk-card uk-margin">
+                        <div class="uk-flex">
+                            <div class="uk-card uk-card-body uk-padding-small uk-width-auto">
+                                Set pin and click OK for co-ordinates
+                            </div>
+                                    <div class="uk-card uk-margin">
+                                        <button type="button" onclick="getGPS();" class="uk-button uk-button-default uk-button-small">OK</button>
+                                    </div>                        
+                        </div>
+                        <iframe id="iframe" src="/addgpsmap" width="650", height="350"></iframe>
+                    </div>
+                </div>
              </div> 
-                <input type="submit" value="Upload" class= "uk-button uk-button-primary uk-button-default">
+            <input type="submit" value="Upload" class= "uk-button uk-button-primary uk-button-default">
     </form>
     <script>
         function getGPS(){
-console.log(latlng);
-document.getElementById("lat").innerHTML = Math.round(latlng.lat* 100)/100;
-document.getElementById("lng").innerHTML = Math.round(latlng.lng* 100)/100;
-        }
-      
+        console.log(latlng);
+        document.getElementById("lat").innerHTML = Math.round(latlng.lat* 100)/100;
+        document.getElementById("lng").innerHTML = Math.round(latlng.lng* 100)/100;
+        }      
     </script>
 </div> 
 {{> error }} 
