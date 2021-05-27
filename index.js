@@ -51,8 +51,6 @@ server.views({
 });
 
 handlebars.registerHelper("ifMadeByYou", function(reviewUser,loggedInuser,options) {
-/*  console.log(reviewUser);
-  console.log(loggedInuser); */
   if (reviewUser != undefined && loggedInuser != undefined) {
   let a = reviewUser;
   let b = loggedInuser;

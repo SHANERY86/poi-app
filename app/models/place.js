@@ -4,6 +4,7 @@ const Schema = Mongoose.Schema;
 const placeSchema = new Schema({
     name: String,
     description: String,
+    descriptionShort: String,
     image: String,
     category: String,
     lat: Number,
@@ -27,14 +28,6 @@ const placeSchema = new Schema({
     social: Schema.Types.Boolean
 },
 { versionKey: false });
-
-const categorySchema = new Schema({
-    name: String,
-    user: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-    }
-});
 
 const ratingSchema = new Schema({
     user: {
@@ -73,6 +66,7 @@ const commentsSchema = new Schema({
         ref: "Place"
     },
     comment: String,
+    commentShort: String,
     dateAndTime: String,
     replies: [{
         userId: {
@@ -85,6 +79,7 @@ const commentsSchema = new Schema({
         },
         username: String,
         reply: String,
+        replyShort: String,
         dateAndTime: String,
     }]
 })
@@ -111,9 +106,6 @@ placeSchema.statics.findAll = function() {
     return this.find({});
   }
 
-categorySchema.statics.findAll = function() {
-    return this.find({});
-  }
 
 ratingSchema.statics.findAll = function() {
     return this.find({});
@@ -132,8 +124,7 @@ eventSchema.statics.findAll = function() {
 }
 
 
-const placeDb = Mongoose.model("Place", placeSchema);
-const categoryDb = Mongoose.model("Category", categorySchema); 
+const placeDb = Mongoose.model("Place", placeSchema); 
 const ratingDb = Mongoose.model("Rating", ratingSchema);
 const reviewDb = Mongoose.model("Review", reviewSchema);
 const commentsDb = Mongoose.model("Comments", commentsSchema);
@@ -141,7 +132,6 @@ const eventDb = Mongoose.model("Event", eventSchema);
 
 module.exports = { 
             placeDb,
-            categoryDb,
             ratingDb,
             reviewDb,
             commentsDb,
