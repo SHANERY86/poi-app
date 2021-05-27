@@ -11,7 +11,6 @@ const NoticeBoard = {
             try{
             const userid = request.auth.credentials.id;
             const user = await User.findById(userid);
-            const loggedInUsername = user.name;
             const socialPlaces = await Place.placeDb.find({ social : true });
             const socialPlaceIds = [];
             for (const place of socialPlaces){
@@ -20,7 +19,6 @@ const NoticeBoard = {
             const events = await Place.eventDb.find({ 
                 "place.id": { $in: socialPlaceIds }, 
                 type: { $nin: "replied" }, 
-                username: { $nin: loggedInUsername } 
             }).lean();
             const replyEvents = await Place.eventDb.find( { type: "replied" } );
             const replyEventsForYou_ids = [];
@@ -56,13 +54,13 @@ const NoticeBoard = {
                 const eventDate = eventdateAndTime.substr(0,2);
                 const utcsecsdiff = (utcsecsnow - event.utc);
                 if(utcsecsdiff < 300){
-                    justNowEvents.push(event);
+                    justNowEvents.unshift(event);
                 }
                 if(utcsecsdiff >= 300 && eventDate == currentDate){
-                    todaysEvents.push(event);
+                    todaysEvents.unshift(event);
                 } 
                 if(eventDate == yesterday){
-                    yesterdaysEvents.push(event);
+                    yesterdaysEvents.unshift(event);
                 } 
                 if(eventDate != currentDate && eventDate != yesterday)
                     dateEntriesLeft.push(event.dayAndMonth);
@@ -78,9 +76,9 @@ const NoticeBoard = {
                 entry.events = [];
                 const result = await Place.eventDb.find( { dayAndMonth: dateEntry } ).lean();
                 for(let i = 0; i < result.length; i++){   
-                    entry.events.push(result[i]);             
+                    entry.events.unshift(result[i]);             
             }
-            laterEvents.push(entry);
+            laterEvents.unshift(entry);
             }
             if(justNowEvents.length == 0 && todaysEvents.length == 0 && yesterdaysEvents == 0 && laterEvents == 0){
                 return h.view("noticeboard", { empty: true } );

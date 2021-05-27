@@ -14,7 +14,7 @@ if (result.error) {
   console.log(result.error.message);
   process.exit(1);
 } 
-*/
+
 
 const server = Hapi.server({
   port: process.env.PORT || 3000,
@@ -51,8 +51,6 @@ server.views({
 });
 
 handlebars.registerHelper("ifMadeByYou", function(reviewUser,loggedInuser,options) {
-/*  console.log(reviewUser);
-  console.log(loggedInuser); */
   if (reviewUser != undefined && loggedInuser != undefined) {
   let a = reviewUser;
   let b = loggedInuser;

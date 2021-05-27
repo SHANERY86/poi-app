@@ -18,9 +18,7 @@ const Places = {
     //this will display the view with the form to add a new POI, it gathers the users categories to display them in the category select drop down menu
     addView: {
         handler: async function (request, h) {
-            const id = request.auth.credentials.id;
-            var userCategories = await Place.categoryDb.find({ user: id }).lean();
-            return h.view("addplaces", { categories: userCategories, } );
+            return h.view("addplaces");
         }
     },
     /*this adds a new POI, inputs are validated through Joi, an input for name and description is mandatory, others are optional. If no image is uploaded, a stand in
@@ -68,9 +66,17 @@ const Places = {
                 const message = "User Input blocked for security reasons"
                 throw Boom.badData(message);
               }
+              let sanitisedDescriptionShort = "";
+              if(sanitisedDescription.length > 300){
+                  sanitisedDescriptionShort = sanitisedDescription.substring(0,300) + "...";
+              }
+              if(sanitisedDescription.length <= 300){
+                  sanitisedDescriptionShort = sanitisedDescription;
+              }
             const newPlace = new Place.placeDb({
                 name: sanitisedName,
                 description: sanitisedDescription,
+                descriptionShort: sanitisedDescriptionShort,
                 user: user._id,
                 image: imageUrl,
                 category: data.category,
@@ -107,12 +113,17 @@ const Places = {
     //displays the POI list without category filter
     places: {
         handler: async function (request, h) {
+            try{
             const id = request.auth.credentials.id;
             const user = await User.findById(id);
             const userPlaces = await Place.placeDb.find({ user: user._id }); 
             await Places.updateWeatherInfo(userPlaces);
             const places = await Place.placeDb.find({ user: user._id }).lean();       
-            return h.view("places", { places: places });           
+            return h.view("places", { places: places }); 
+            }
+            catch (err) {
+                return h.view("errorpage", { errors: [{ message: err.message }] } );
+            }          
         }
     },
     socialPlaces: {
@@ -136,7 +147,8 @@ const Places = {
             const place = await Place.placeDb.findById(placeId).lean();
             const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();
             const user = await User.findById(request.auth.credentials.id).lean();    
-            const placeComments = await Place.commentsDb.find( { place: place } ).lean();  
+            const placeComments = await Place.commentsDb.find( { place: place } ).lean(); 
+            await Places.loadRatingAvg(placeId); 
             return h.view("place", { place: place, reviews: placeReviews, user: user, comments: placeComments });
         }
     },
@@ -147,6 +159,7 @@ const Places = {
             const placeReviews = await Place.reviewDb.find({ place: placeId }).lean();
             const user = await User.findById(request.auth.credentials.id).lean();    
             const placeComments = await Place.commentsDb.find( { place: place } ).lean();  
+            await Places.loadRatingAvg(placeId);
             return h.view("place", { place: place, reviews: placeReviews, user: user, comments: placeComments, social:true });
         }       
     },
@@ -160,6 +173,7 @@ const Places = {
             const dateAndTime = Social.getDateAndTime();
             const event = new Place.eventDb({
                 type: "shared a Place",
+                refid: placeId,
                 dateAndTime: dateAndTime.dateAndTime,
                 utc: dateAndTime.utc,
                 dayAndMonth: dateAndTime.dayAndMonth,
@@ -182,7 +196,9 @@ const Places = {
             place.social = false;
             place.save();
             const shareEvent = await Place.eventDb.find( { type:"shared a Place", "place.id": placeId } );
+            if(shareEvent[0]){
             shareEvent[0].remove();
+            }
             return h.redirect("/places");
         }
     },
@@ -199,7 +215,8 @@ const Places = {
     placesByCategory: {
         handler: async function (request, h) {
             const category = request.params.cat; 
-            const placesInCategory = await Place.placeDb.find( { category: category } ).lean();
+            const userid = request.auth.credentials.id;
+            const placesInCategory = await Place.placeDb.find( { category: category, user:userid } ).lean();
             return h.view("places", { places: placesInCategory });          
         }
     },
@@ -405,6 +422,9 @@ const Places = {
     map: {
         handler: async function (request, h) {
             let places = await Place.placeDb.findAll();
+            for(const place of places){
+                await Places.loadRatingAvg(place._id); 
+            }
             await Places.updateWeatherInfo(places);
             places = await Place.placeDb.find({ social: true }).lean(); 
             return h.view("allmap", { places: places }); 
@@ -449,6 +469,23 @@ const Places = {
             "River",
             "Island" ]
             return categories;
+    },
+    async loadRatingAvg(placeId){
+        const placeRatings = await Place.ratingDb.find( { place: placeId } );
+        let ratingstotal = 0;
+        let ratingsAvg = 0;
+        let index = 0;
+        placeRatings.forEach(function(placeRating) {
+            ratingstotal += placeRating.rating;
+            index++;
+        })
+        if(index > 0){
+        ratingsAvg = ratingstotal / index;
+        const placeObj = await Place.placeDb.findById(placeId);
+        placeObj.numberOfRatings = index;
+        placeObj.rating = Math.round(ratingsAvg * 10)/10;
+        await placeObj.save();
+        }
     }
 };
 
